@@ -5,15 +5,18 @@ import numpy
 account_id = ""
 login_url = "https://login.questrade.com/oauth2/token?grant_type=refresh_token&refresh_token="
 ratios = {
-"VE.TO":23,
-"VA.TO":15,
-"VEE.TO":11,
-"VCN.TO":4,
-"VUN.TO":47}
+  "VE.TO": 23,
+  "VA.TO": 15,
+  "VEE.TO": 11,
+  "VCN.TO": 4,
+  "VUN.TO": 47
+}
 assert sum(ratios.itervalues()) == 100
 
 f = open("login_response.txt", "r")
-login_response = json.loads(f.read())
+
+account_id = f.readline()
+login_response = json.loads(f.readline())
 f.close()
 
 refresh_token = login_response["refresh_token"]
@@ -21,7 +24,7 @@ response = requests.get(login_url + refresh_token)
 assert response.status_code/100 == 2
 
 f = open("login_response.txt", "w")
-f.write(response.text)
+f.write("%s\n%s" % (account_id, response.text))
 f.close()
 
 login_response = response.json()
