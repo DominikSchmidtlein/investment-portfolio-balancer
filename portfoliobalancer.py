@@ -53,7 +53,7 @@ sum_theoretical_value = 0
 for position in etfs["positions"]:
 	position["percentage"] = composition[position["symbol"]] / 100.0
 	position["theoreticalQuantity"] = etfs["totalEquity"] * position["percentage"] / position["currentPrice"]
-	position["theoreticalValue"] = position["purchaseQuantity"] * position["currentPrice"]
+	position["theoreticalValue"] = position["theoreticalQuantity"] * position["currentPrice"]
 	position["purchaseQuantity"] = round(max(position["theoreticalQuantity"] - position["openQuantity"], 0), -1)
 	position["purchaseValue"] = position["purchaseQuantity"] * position["currentPrice"]
 	
