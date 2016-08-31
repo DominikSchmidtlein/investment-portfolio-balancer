@@ -45,6 +45,11 @@ balances = response.json()
 etfs["cash"] = balances["perCurrencyBalances"][0]["cash"]
 etfs["marketValue"] = balances["perCurrencyBalances"][0]["marketValue"]
 etfs["totalEquity"] = balances["perCurrencyBalances"][0]["totalEquity"]
+assert isinstance(etfs["cash"], float)
+assert etfs["cash"] >= 0
+assert etfs["marketValue"] >= 0
+assert etfs["totalEquity"] >= 0
+assert etfs["totalEquity"] == etfs["marketValue"] + etfs["cash"]
 
 etfs["theoreticalMarketValue"] = 0
 etfs["theoreticalTotalEquity"] = etfs["totalEquity"]
@@ -52,7 +57,6 @@ etfs["theoreticalTotalEquity"] = etfs["totalEquity"]
 etfs["practicalMarketValue"] = 0
 etfs["practicalTotalEquity"] = etfs["totalEquity"]
 
-assert isinstance(etfs["cash"], float)
 
 # etfs["totalEquity"] += 1000
 
@@ -69,21 +73,34 @@ for position in etfs["positions"]:
 	position["practicalQuantity"] = position["openQuantity"] + position["purchaseQuantity"]
 	position["practicalValue"] = position["practicalQuantity"] * position["currentPrice"]
 	etfs["practicalMarketValue"] += position["practicalValue"]
-	
-
-	print position["symbol"]
-	print position["openQuantity"]
-	print position["theoreticalQuantity"]
-	print position["purchaseQuantity"]
 
 etfs["theoreticalCash"] = etfs["theoreticalTotalEquity"] - etfs["theoreticalMarketValue"]
 etfs["practicalCash"] = etfs["practicalTotalEquity"] - etfs["practicalMarketValue"]
 
+assert etfs["theoreticalCash"] == 0
+assert etfs["practicalCash"] >= 0
+assert etfs["theoreticalMarketValue"] == etfs["theoreticalTotalEquity"]
+assert etfs["totalEquity"] = etfs["theoreticalTotalEquity"]
+assert etfs["totalEquity"] = etfs["practicalTotalEquity"]
 
-print "Total equity: ", etfs["totalEquity"]
-print "Theoretical market value: ", etfs["theoreticalMarketValue"]
-print "Theoretical cash: ", etfs["theoreticalCash"]
-print "Practical market value: ", etfs["practicalMarketValue"]
-print "Practical cash: ", etfs["practicalCash"]
-
-print etfs
+template = "{bound}{pad}{field1:{filler}<{w1}}{bound}{pad}{field2:{filler}<{w2}}{bound}"
+w1 = 10
+w2 = 10
+print "Purchases:"
+print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+print template.format(bound="|",pad=" ",filler=" ",field1="Symbol",field2="Quantity",w1=w1,w2=w2)
+print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+for position in etfs["positions"]:
+	print template.format(bound="|",pad=" ",filler=" ",field1=position["symbol"],field2=position["purchaseQuantity"],w1=w1,w2=w2)
+print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+print ""
+w1 = 15
+w2 = 15
+print "Post Purchase Balances:"
+print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+print template.format(bound="|",pad=" ",filler=" ",field1="Balance",field2="Value",w1=w1,w2=w2)
+print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+print template.format(bound="|",pad=" ",filler=" ",field1="Cash",field2=etfs["practicalCash"],w1=w1,w2=w2)
+print template.format(bound="|",pad=" ",filler=" ",field1="Market Value",field2=etfs["practicalMarketValue"],w1=w1,w2=w2)
+print template.format(bound="|",pad=" ",filler=" ",field1="Total Equity",field2=etfs["practicalTotalEquity"],w1=w1,w2=w2)
+print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
