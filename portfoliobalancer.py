@@ -12,19 +12,16 @@ ratios = {
 }
 assert sum(ratios.itervalues()) == 100
 
-f = open("login_response.txt", "r")
-
-account_id = f.readline()
-login_response = json.loads(f.readline())
-f.close()
+with open("login_response.txt", "r") as f:
+	account_id = f.readline()
+	login_response = json.loads(f.readline())
 
 refresh_token = login_response["refresh_token"]
 response = requests.get(login_url + refresh_token)
-assert response.status_code/100 == 2
+response.raise_for_status()
 
-f = open("login_response.txt", "w")
-f.write("%s\n%s" % (account_id, response.text))
-f.close()
+with open("login_response.txt", "w") as f:
+	f.write("%s\n%s" % (account_id, response.text))
 
 login_response = response.json()
 
@@ -39,7 +36,7 @@ balances_url = account_id_url + "/balances"
 
 headers = {"authorization":"%s %s" % (token_type, access_token)}
 response = requests.get(positions_url, headers=headers)
-assert response.status_code/100 == 2
+response.raise_for_status()
 etfs = response.json()
 
 response = requests.get(balances_url, headers=headers)
