@@ -1,16 +1,15 @@
 import requests
 import json
 
-account_id = ""
 login_url = "https://login.questrade.com/oauth2/token?grant_type=refresh_token&refresh_token="
-ratios = {
+composition = {
   "VE.TO": 23,
   "VA.TO": 15,
   "VEE.TO": 11,
   "VCN.TO": 4,
   "VUN.TO": 47
 }
-assert sum(ratios.itervalues()) == 100
+assert sum(composition.itervalues()) == 100
 
 with open("login_response.txt", "r") as f:
 	account_id = f.readline().rstrip()
@@ -40,7 +39,7 @@ response.raise_for_status()
 etfs = response.json()
 
 response = requests.get(balances_url, headers=headers)
-assert response.status_code/100 == 2
+response.raise_for_status()
 balances = response.json()
 
 etfs["cash"] = balances["perCurrencyBalances"][0]["cash"]
@@ -49,12 +48,21 @@ etfs["totalEquity"] = balances["perCurrencyBalances"][0]["totalEquity"]
 assert isinstance(etfs["cash"], float)
 
 # etfs["totalEquity"] += 1000
+sum_theoretical_value = 0
 
 for position in etfs["positions"]:
-	position["ratio"] = ratios[position["symbol"]]
-	position["potentialQuantity"] = etfs["totalEquity"] * position["ratio"] / 100.0 / position["currentPrice"]
-	position["purchaseQuantity"] = int(max(position["potentialQuantity"] - position["openQuantity"], 0) / 10) * 10
+	position["percentage"] = composition[position["symbol"]] / 100.0
+	position["theoreticalQuantity"] = etfs["totalEquity"] * position["percentage"] / position["currentPrice"]
+	position["theoreticalValue"] = position["purchaseQuantity"] * position["currentPrice"]
+	position["purchaseQuantity"] = round(max(position["theoreticalQuantity"] - position["openQuantity"], 0), -1)
+	position["purchaseValue"] = position["purchaseQuantity"] * position["currentPrice"]
+	
+	sum_theoretical_value += position["theoreticalValue"]
+
 	print position["symbol"]
 	print position["openQuantity"]
-	print position["potentialQuantity"]
+	print position["theoreticalQuantity"]
 	print position["purchaseQuantity"]
+
+print "Sum of theoretical values: ", sum_theoretical_value
+print "Total equity: ", etfs["totalEquity"]
