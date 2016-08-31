@@ -45,24 +45,45 @@ balances = response.json()
 etfs["cash"] = balances["perCurrencyBalances"][0]["cash"]
 etfs["marketValue"] = balances["perCurrencyBalances"][0]["marketValue"]
 etfs["totalEquity"] = balances["perCurrencyBalances"][0]["totalEquity"]
+
+etfs["theoreticalMarketValue"] = 0
+etfs["theoreticalTotalEquity"] = etfs["totalEquity"]
+
+etfs["practicalMarketValue"] = 0
+etfs["practicalTotalEquity"] = etfs["totalEquity"]
+
 assert isinstance(etfs["cash"], float)
 
 # etfs["totalEquity"] += 1000
-sum_theoretical_value = 0
 
 for position in etfs["positions"]:
 	position["percentage"] = composition[position["symbol"]] / 100.0
+
 	position["theoreticalQuantity"] = etfs["totalEquity"] * position["percentage"] / position["currentPrice"]
 	position["theoreticalValue"] = position["theoreticalQuantity"] * position["currentPrice"]
+	etfs["theoreticalMarketValue"] += position["theoreticalValue"]
+
 	position["purchaseQuantity"] = round(max(position["theoreticalQuantity"] - position["openQuantity"], 0), -1)
 	position["purchaseValue"] = position["purchaseQuantity"] * position["currentPrice"]
+
+	position["practicalQuantity"] = position["openQuantity"] + position["purcahseQuantity"]
+	position["practicalValue"] = position["practicalQuantity"] * position["currentPrice"]
+	etfs["practicalMarketValue"] += position["practicalValue"]
 	
-	sum_theoretical_value += position["theoreticalValue"]
 
 	print position["symbol"]
 	print position["openQuantity"]
 	print position["theoreticalQuantity"]
 	print position["purchaseQuantity"]
 
-print "Sum of theoretical values: ", sum_theoretical_value
+etfs["theoreticalCash"] = etfs["theoreticalTotalEquity"] - etfs["theoreticalMarketValue"]
+etfs["practicalCash"] = etfs["practicalTotalEquity"] - etfs["practicalMarketValue"]
+
+
 print "Total equity: ", etfs["totalEquity"]
+print "Theoretical market value: ", etfs["theoreticalMarketValue"]
+print "Theoretical cash: ", etfs["theoreticalCash"]
+print "Practical market value: ", etfs["practicalMarketValue"]
+print "Practical cash: ", etfs["practicalCash"]
+
+print etfs
