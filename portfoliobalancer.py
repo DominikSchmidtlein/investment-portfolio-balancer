@@ -66,7 +66,7 @@ for position in etfs["positions"]:
 	position["purchaseQuantity"] = round(max(position["theoreticalQuantity"] - position["openQuantity"], 0), -1)
 	position["purchaseValue"] = position["purchaseQuantity"] * position["currentPrice"]
 
-	position["practicalQuantity"] = position["openQuantity"] + position["purcahseQuantity"]
+	position["practicalQuantity"] = position["openQuantity"] + position["purchaseQuantity"]
 	position["practicalValue"] = position["practicalQuantity"] * position["currentPrice"]
 	etfs["practicalMarketValue"] += position["practicalValue"]
 	
