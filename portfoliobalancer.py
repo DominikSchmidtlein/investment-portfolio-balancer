@@ -54,7 +54,7 @@ assert isinstance(etfs["cash"], float)
 assert etfs["cash"] >= 0
 assert etfs["marketValue"] >= 0
 assert etfs["totalEquity"] >= 0
-assert abs(etfs["totalEquity"] - etfs["marketValue"] - etfs["cash"]) <= 0.01
+assert abs(etfs["totalEquity"] - etfs["marketValue"] - etfs["cash"]) < 0.01
 
 etfs["theoreticalMarketValue"] = 0
 etfs["theoreticalTotalEquity"] = etfs["totalEquity"]
@@ -82,11 +82,11 @@ for position in etfs["positions"]:
 etfs["theoreticalCash"] = etfs["theoreticalTotalEquity"] - etfs["theoreticalMarketValue"]
 etfs["practicalCash"] = etfs["practicalTotalEquity"] - etfs["practicalMarketValue"]
 
-assert etfs["theoreticalCash"] == 0
+assert abs(etfs["theoreticalCash"]) < 0.01
 assert etfs["practicalCash"] >= 0
-assert etfs["theoreticalMarketValue"] == etfs["theoreticalTotalEquity"]
-assert etfs["totalEquity"] == etfs["theoreticalTotalEquity"]
-assert etfs["totalEquity"] == etfs["practicalTotalEquity"]
+assert abs(etfs["theoreticalMarketValue"] - etfs["theoreticalTotalEquity"]) < 0.01
+assert abs(etfs["totalEquity"] - etfs["theoreticalTotalEquity"]) < 0.01
+assert abs(etfs["totalEquity"] - etfs["practicalTotalEquity"]) < 0.01
 
 template = "{bound}{pad}{field1:{filler}<{w1}}{pad}{bound}{pad}{field2:{filler}>{w2}}{pad}{bound}"
 w1 = 10
