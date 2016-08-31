@@ -13,7 +13,7 @@ ratios = {
 assert sum(ratios.itervalues()) == 100
 
 with open("login_response.txt", "r") as f:
-	account_id = f.readline()
+	account_id = f.readline().rstrip()
 	login_response = json.loads(f.readline())
 
 refresh_token = login_response["refresh_token"]
