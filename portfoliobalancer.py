@@ -1,6 +1,5 @@
 import requests
 import json
-import numpy
 
 account_id = ""
 login_url = "https://login.questrade.com/oauth2/token?grant_type=refresh_token&refresh_token="
