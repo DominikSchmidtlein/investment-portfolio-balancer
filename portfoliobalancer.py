@@ -45,11 +45,16 @@ balances = response.json()
 etfs["cash"] = balances["perCurrencyBalances"][0]["cash"]
 etfs["marketValue"] = balances["perCurrencyBalances"][0]["marketValue"]
 etfs["totalEquity"] = balances["perCurrencyBalances"][0]["totalEquity"]
+
+print etfs["cash"]
+print etfs["marketValue"]
+print etfs["totalEquity"]
+
 assert isinstance(etfs["cash"], float)
 assert etfs["cash"] >= 0
 assert etfs["marketValue"] >= 0
 assert etfs["totalEquity"] >= 0
-assert etfs["totalEquity"] == etfs["marketValue"] + etfs["cash"]
+assert abs(etfs["totalEquity"] - etfs["marketValue"] - etfs["cash"]) <= 0.01
 
 etfs["theoreticalMarketValue"] = 0
 etfs["theoreticalTotalEquity"] = etfs["totalEquity"]
