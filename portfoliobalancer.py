@@ -88,7 +88,7 @@ assert etfs["theoreticalMarketValue"] == etfs["theoreticalTotalEquity"]
 assert etfs["totalEquity"] == etfs["theoreticalTotalEquity"]
 assert etfs["totalEquity"] == etfs["practicalTotalEquity"]
 
-template = "{bound}{pad}{field1:{filler}<{w1}}{bound}{pad}{field2:{filler}<{w2}}{bound}"
+template = "{bound}{pad}{field1:{filler}<{w1}}{bound}{pad}{field2:{filler}>{w2}}{bound}"
 w1 = 10
 w2 = 10
 print "Purchases:"
