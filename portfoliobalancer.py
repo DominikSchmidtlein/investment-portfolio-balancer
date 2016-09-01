@@ -65,6 +65,7 @@ class PortfolioCalculator:
 
 	def calculate_theoretical(self):
 		self.portfolio["theoreticalTotalEquity"] = self.portfolio["totalEquity"]
+		self.portfolio["theoreticalMarketValue"] = 0
 		for position in self.portfolio["positions"]:
 			position["theoreticalQuantity"] = self.portfolio["totalEquity"] * position["percentage"] / position["currentPrice"]
 			position["theoreticalValue"] = position["theoreticalQuantity"] * position["currentPrice"]
@@ -78,6 +79,7 @@ class PortfolioCalculator:
 
 	def calculate_practical(self):
 		self.portfolio["practicalTotalEquity"] = self.portfolio["totalEquity"]
+		self.portfolio["practicalMarketValue"] = 0
 		for position in self.portfolio["positions"]:
 			position["practicalQuantity"] = position["openQuantity"] + position["purchaseQuantity"]
 			position["practicalValue"] = position["practicalQuantity"] * position["currentPrice"]
