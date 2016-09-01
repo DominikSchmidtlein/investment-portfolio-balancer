@@ -21,7 +21,7 @@ class PortfolioBalancer:
 	def questrade_login(self):
 		self.questradeAPI = QuestradeAPI(self.account_id)
 		config = self.questradeAPI.login(self.refresh_token)
-		self.configFileHandler.save(config)
+		self.configFileHandler.save(json.dumps(config))
 
 	def get_portfolio(self):
 		self.portfolio = self.questradeAPI.get_positions()
