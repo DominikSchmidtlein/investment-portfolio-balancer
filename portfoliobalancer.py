@@ -7,28 +7,28 @@ class PortfolioBalancer:
 		self.configFileHandler = ConfigFileHandler(".config")
 
 	def balance(self):
-		load_config()
-		questrade_login()
-		
-		PortfolioCalculator(portfolio).calculate()
-		PortfolioPrinter(portfolio).print_all()
+		self.load_config()
+		self.questrade_login()
+		self.get_portfolio()		
+		PortfolioCalculator(self.portfolio).calculate()
+		PortfolioPrinter(self.portfolio).print_all()
 
 	def load_config(self):
-		config = configFileHandler.load()
+		config = self.configFileHandler.load()
 		self.account_id = config["account_id"]
 		self.refresh_token = config["refresh_token"]
 
 	def questrade_login(self):
-		self.questradeAPI = QuestradeAPI(account_id)
-		config = questradeAPI.login(refresh_token)
-		configFileHandler.save(config)
+		self.questradeAPI = QuestradeAPI(self.account_id)
+		config = self.questradeAPI.login(self.refresh_token)
+		self.configFileHandler.save(config)
 
 	def get_portfolio(self):
-		self.portfolio = questradeAPI.get_positions()
-		balances = questradeAPI.get_balances()["perCurrencyBalances"][0]
-		portfolio["cash"] = balances["cash"]
-		portfolio["marketValue"] = balances["marketValue"]
-		portfolio["totalEquity"] = balances["totalEquity"]
+		self.portfolio = self.questradeAPI.get_positions()
+		balances = self.questradeAPI.get_balances()["perCurrencyBalances"][0]
+		self.portfolio["cash"] = balances["cash"]
+		self.portfolio["marketValue"] = balances["marketValue"]
+		self.portfolio["totalEquity"] = balances["totalEquity"]
 
 class PortfolioCalculator:
 
@@ -96,11 +96,11 @@ class ConfigFileHandler:
 		self.filename = filename
 
 	def load(self):
-		with open(filename, "r") as f:
+		with open(self.filename, "r") as f:
 			return json.loads(f.read())
 
 	def save(self, config):
-		with open(filename, "w") as f:
+		with open(self.filename, "w") as f:
 			f.write(config)
 
 class QuestradeAPI:
@@ -115,7 +115,7 @@ class QuestradeAPI:
 		config = response.json()
 
 		api_server = config["api_server"]
-		account_id_url = api_server + "v1/accounts/" + account_id
+		account_id_url = api_server + "v1/accounts/" + self.account_id
 		self.positions_url = account_id_url + "/positions"
 		self.balances_url = account_id_url + "/balances"
 
@@ -125,7 +125,7 @@ class QuestradeAPI:
 			"authorization": "%s %s" % (token_type, access_token)
 		}
 
-		config["account_id"] = account_id
+		config["account_id"] = self.account_id
 		return config
 
 	def get_balances(self):
@@ -154,7 +154,7 @@ class PortfolioPrinter:
 		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
 		print template.format(bound="|",pad=" ",filler=" ",field1="Symbol",field2="Quantity",w1=w1,w2=w2)
 		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
-		for position in portfolio["positions"]:
+		for position in self.portfolio["positions"]:
 			print template.format(bound="|",pad=" ",filler=" ",field1=position["symbol"],field2=position["purchaseQuantity"],w1=w1,w2=w2)
 		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
 		print ""
@@ -166,9 +166,9 @@ class PortfolioPrinter:
 		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
 		print template.format(bound="|",pad=" ",filler=" ",field1="Balance",field2="Value",w1=w1,w2=w2)
 		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Cash",field2=portfolio["practicalCash"],w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Market Value",field2=portfolio["practicalMarketValue"],w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Total Equity",field2=portfolio["practicalTotalEquity"],w1=w1,w2=w2)
+		print template.format(bound="|",pad=" ",filler=" ",field1="Cash",field2=self.portfolio["practicalCash"],w1=w1,w2=w2)
+		print template.format(bound="|",pad=" ",filler=" ",field1="Market Value",field2=self.portfolio["practicalMarketValue"],w1=w1,w2=w2)
+		print template.format(bound="|",pad=" ",filler=" ",field1="Total Equity",field2=self.portfolio["practicalTotalEquity"],w1=w1,w2=w2)
 		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
 		print ""
 
