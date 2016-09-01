@@ -1,5 +1,6 @@
 import requests
 import json
+import sys
 
 class PortfolioBalancer:
 
@@ -7,11 +8,18 @@ class PortfolioBalancer:
 		self.configFileHandler = ConfigFileHandler(".config")
 
 	def balance(self):
-		self.load_config()
+		if len(sys.argv) == 3:
+			use_argv()
+		else:
+			self.load_config()
 		self.questrade_login()
 		self.get_portfolio()		
 		PortfolioCalculator(self.portfolio).calculate()
 		PortfolioPrinter(self.portfolio).print_all()
+
+	def use_argv(self):
+		self.account_id = argv[1]
+		self.refresh_token = argv[2]
 
 	def load_config(self):
 		config = self.configFileHandler.load()
