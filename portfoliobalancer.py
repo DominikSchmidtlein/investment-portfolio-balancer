@@ -92,12 +92,12 @@ class PortfolioCalculator:
 		assert abs(self.portfolio["totalEquity"] - self.portfolio["practicalTotalEquity"]) < 0.01
 
 	def calculate(self):
-		check_portfolio()
-		calculate_percentage()
-		calculate_theoretical()
-		calculate_purchases()
-		calculate_practical()
-		check_calculations()
+		self.check_portfolio()
+		self.calculate_percentage()
+		self.calculate_theoretical()
+		self.calculate_purchases()
+		self.calculate_practical()
+		self.check_calculations()
 
 class ConfigFileHandler:
 	def __init__(self, filename):
@@ -152,8 +152,8 @@ class PortfolioPrinter:
 		self.portfolio = portfolio
 
 	def print_all(self):
-		print_purchases()
-		print_balances()
+		self.print_purchases()
+		self.print_balances()
 
 	def print_purchases(self):
 		w1 = 10
