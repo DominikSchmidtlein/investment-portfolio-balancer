@@ -18,8 +18,8 @@ class PortfolioBalancer:
 		PortfolioPrinter(self.portfolio).print_all()
 
 	def use_argv(self):
-		self.account_id = argv[1]
-		self.refresh_token = argv[2]
+		self.account_id = sys.argv[1]
+		self.refresh_token = sys.argv[2]
 
 	def load_config(self):
 		config = self.configFileHandler.load()
