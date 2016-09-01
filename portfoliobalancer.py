@@ -9,7 +9,7 @@ class PortfolioBalancer:
 
 	def balance(self):
 		if len(sys.argv) == 3:
-			use_argv()
+			self.use_argv()
 		else:
 			self.load_config()
 		self.questrade_login()
