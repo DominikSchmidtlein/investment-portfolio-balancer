@@ -39,7 +39,7 @@ class PortfolioCalculator:
 	  "VCN.TO": 4,
 	  "VUN.TO": 47
 	}
-	assert sum(composition.itervalues()) == 100
+	# assert sum(composition.itervalues()) == 100
 
 	def __init__(self, portfolio):
 		self.portfolio = portfolio
@@ -53,7 +53,7 @@ class PortfolioCalculator:
 
 	def calculate_percentage(self):
 		for position in self.portfolio["positions"]:
-			position["percentage"] = composition[position["symbol"]] / 100.0
+			position["percentage"] = self.composition[position["symbol"]] / 100.0
 
 	def calculate_theoretical(self):
 		self.portfolio["theoreticalTotalEquity"] = self.portfolio["totalEquity"]
@@ -110,7 +110,7 @@ class QuestradeAPI:
 		self.account_id = account_id
 		
 	def login(self, refresh_token):
-		response = requests.get(login_url + refresh_token)
+		response = requests.get(self.login_url + refresh_token)
 		response.raise_for_status()
 		config = response.json()
 
@@ -151,25 +151,25 @@ class PortfolioPrinter:
 		w1 = 10
 		w2 = 10
 		print "Purchases:"
-		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Symbol",field2="Quantity",w1=w1,w2=w2)
-		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+		print self.template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+		print self.template.format(bound="|",pad=" ",filler=" ",field1="Symbol",field2="Quantity",w1=w1,w2=w2)
+		print self.template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
 		for position in self.portfolio["positions"]:
-			print template.format(bound="|",pad=" ",filler=" ",field1=position["symbol"],field2=position["purchaseQuantity"],w1=w1,w2=w2)
-		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+			print self.template.format(bound="|",pad=" ",filler=" ",field1=position["symbol"],field2=position["purchaseQuantity"],w1=w1,w2=w2)
+		print self.template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
 		print ""
 
 	def print_balances(self):
 		w1 = 15
 		w2 = 15
 		print "Post Purchase Balances:"
-		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Balance",field2="Value",w1=w1,w2=w2)
-		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Cash",field2=self.portfolio["practicalCash"],w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Market Value",field2=self.portfolio["practicalMarketValue"],w1=w1,w2=w2)
-		print template.format(bound="|",pad=" ",filler=" ",field1="Total Equity",field2=self.portfolio["practicalTotalEquity"],w1=w1,w2=w2)
-		print template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+		print self.template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+		print self.template.format(bound="|",pad=" ",filler=" ",field1="Balance",field2="Value",w1=w1,w2=w2)
+		print self.template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
+		print self.template.format(bound="|",pad=" ",filler=" ",field1="Cash",field2=self.portfolio["practicalCash"],w1=w1,w2=w2)
+		print self.template.format(bound="|",pad=" ",filler=" ",field1="Market Value",field2=self.portfolio["practicalMarketValue"],w1=w1,w2=w2)
+		print self.template.format(bound="|",pad=" ",filler=" ",field1="Total Equity",field2=self.portfolio["practicalTotalEquity"],w1=w1,w2=w2)
+		print self.template.format(bound="+",pad="-",filler="-",field1="",field2="",w1=w1,w2=w2)
 		print ""
 
 def main():
