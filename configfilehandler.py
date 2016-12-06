@@ -5,7 +5,7 @@ class ConfigFileHandler:
 		self.filename = filename
 
 	def load(self):
-		with open(self.filename, "r") as f:
+		with open(self.filename) as f:
 			return json.load(f)
 
 	def save(self, config):
