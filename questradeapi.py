@@ -1,5 +1,4 @@
 import requests
-import pdb
 
 class QuestradeAPI:
 	login_url = "https://login.questrade.com/oauth2/token?grant_type=refresh_token&refresh_token="
@@ -63,7 +62,6 @@ class QuestradeAPI:
 			"secondaryRoute": "AUTO",
 		}
 		response = requests.post(self.orders_url, headers=self.post_headers, json=data)
-		pdb.set_trace()
 		response.raise_for_status()
 		return response.json()
 		
