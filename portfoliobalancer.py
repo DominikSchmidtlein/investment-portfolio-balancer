@@ -12,22 +12,15 @@ class PortfolioBalancer:
 
 	def balance(self):
 		if len(sys.argv) == 2:
-			self.use_argv()
+			self.refresh_token = sys.argv[1].rstrip()
 		else:
-			self.load_config()
+			self.refresh_token = self.configFileHandler.load_refresh_token()
 		self.questrade_login()
 		self.select_account()
 		self.get_portfolio()		
 		PortfolioCalculator(self.portfolio).calculate()
 		PortfolioPrinter(self.portfolio).print_all()
 		self.place_oders()
-
-	def use_argv(self):
-		self.refresh_token = sys.argv[1].rstrip()
-
-	def load_config(self):
-		config = self.configFileHandler.load()
-		self.refresh_token = config["refresh_token"]
 
 	def questrade_login(self):
 		self.questradeAPI = QuestradeAPI(self.refresh_token)
