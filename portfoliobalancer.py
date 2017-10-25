@@ -17,7 +17,7 @@ class PortfolioBalancer:
 			self.refresh_token = self.configFileHandler.load_refresh_token()
 		self.questrade_login()
 		self.select_account()
-		self.get_portfolio()		
+		self.get_portfolio()
 		PortfolioCalculator(self.portfolio).calculate()
 		PortfolioPrinter(self.portfolio).print_all()
 		self.place_oders()
