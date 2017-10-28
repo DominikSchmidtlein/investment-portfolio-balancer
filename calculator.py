@@ -31,8 +31,7 @@ class Calculator:
                 'symbol': p['symbol'],
                 'currentMarketValue': p['currentMarketValue'] +
                 sum(x['purchaseValue'] for x in purchases if x['symbol'] == p['symbol'])
-            }
-            for p in positions
+            } for p in positions
         ]
         return self.calculate_percentages(new_positions)
 
