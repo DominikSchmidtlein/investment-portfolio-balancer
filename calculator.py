@@ -9,6 +9,41 @@ class Calculator:
         }
         assert sum(self.composition.itervalues()) == 1
 
+    def calculate_percentages(self, positions):
+        total_market_value = sum(p['currentMarketValue'] for p in positions)
+        positions_w_percentages = [{
+            'symbol': p['symbol'],
+            'marketValue': p['currentMarketValue'],
+            'actual %': p['currentMarketValue'] / total_market_value * 100,
+            'ideal %': self.composition[p['symbol']] * 100
+        } for p in positions]
+        positions_w_percentages.append({
+            'symbol': 'Total',
+            'marketValue': total_market_value,
+            'actual %': sum(p['actual %'] for p in positions_w_percentages),
+            'ideal %': sum(p['ideal %'] for p in positions_w_percentages)
+        })
+        return positions_w_percentages
+
+    def new_percentages(self, positions, purchases):
+        new_positions = [
+            {
+                'symbol': p['symbol'],
+                'currentMarketValue': p['currentMarketValue'] +
+                sum(x['purchaseValue'] for x in purchases if x['symbol'] == p['symbol'])
+            }
+            for p in positions
+        ]
+        return self.calculate_percentages(new_positions)
+
+    def new_balances(self, old_balances, purchases):
+        total_purchase_value = sum(p['purchaseValue'] for p in purchases)
+        return {
+            'cash': old_balances['cash'] - total_purchase_value,
+            'marketValue': old_balances['marketValue'] + total_purchase_value,
+            'totalEquity': old_balances['totalEquity']
+        }
+
     def purchases(self, positions, balances):
         # which securities are needed
         needed_positions = filter(lambda position:
