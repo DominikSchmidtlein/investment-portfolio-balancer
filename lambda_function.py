@@ -13,7 +13,8 @@ def lambda_handler(event, context):
     config.update(qclient.login_response)
     configmanager.put_config(config)
     # get portfolio positions
-    positions = qclient.get_positions(False, ['currentPrice', 'openQuantity', 'symbol', 'symbolId', 'currentMarketValue'])
+    positions = qclient.get_positions(False,
+        ['currentPrice', 'openQuantity', 'symbol', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
     # get portfolio balances
     balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]
     calculator = Calculator()

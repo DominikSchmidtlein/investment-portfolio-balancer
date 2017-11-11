@@ -49,15 +49,19 @@ class Calculator:
             position['currentMarketValue'] < balances['totalEquity'] * self.composition[position['symbol']],
             positions)
         # calculate new composition
-        normalized_composition = { p['symbol']: self.composition[p['symbol']] for p in needed_positions }
-        composition_total = sum(normalized_composition.itervalues())
-        normalized_composition = { k: v / composition_total for k, v in normalized_composition.items() }
-        assert int(sum(normalized_composition.itervalues())) == 1
+        normalized_composition = self.__new_composition(needed_positions)
         # how much equity do we have to work with
         normalized_equity = sum(p['currentMarketValue'] for p in needed_positions) + balances['cash']
         # what should we purchase
         return map(lambda position: self.__needed_purchase_quantity(position, normalized_equity, normalized_composition),
             needed_positions)
+
+    def __new_composition(self, needed_positions):
+        needed_compositions = { p['symbol']: self.composition[p['symbol']] for p in needed_positions }
+        composition_total = sum(needed_compositions.itervalues())
+        normalized_composition = { k: v / composition_total for k, v in needed_compositions.items() }
+        assert int(sum(normalized_composition.itervalues())) == 1
+        return normalized_composition
 
     def __needed_purchase_quantity(self, position, total_equity, composition):
         theoretical_market_value = total_equity * composition[position['symbol']]
@@ -69,6 +73,8 @@ class Calculator:
         return {
             'symbol': position['symbol'],
             'symbolId': position['symbolId'],
+            'currentPrice': position['currentPrice'],
+            'averageEntryPrice': position['averageEntryPrice'],
             'purchaseValue': practical_purchase_value,
             'purchaseQuantity': practical_purchase_quantity
-            }
+        }

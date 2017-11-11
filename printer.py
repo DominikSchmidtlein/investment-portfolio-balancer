@@ -5,10 +5,10 @@ class Printer:
         pass
 
     def print_transactions(self, transactions):
-        table = PrettyTable(['Symbol', 'Purchase Quantity', 'Purchase Value'])
-        table.align.update({'Purchase Quantity': 'r', 'Purchase Value': 'r'})
+        table = PrettyTable(['Symbol', 'Purchase Quantity', 'Purchase Value', 'Current Price', 'Average Entry Price'])
+        table.align.update({'Purchase Quantity': 'r', 'Purchase Value': 'r', 'Current Price': 'r', 'Average Entry Price': 'r'})
         for t in transactions:
-            table.add_row([t['symbol'], t['purchaseQuantity'], t['purchaseValue']])
+            table.add_row([t['symbol'], t['purchaseQuantity'], t['purchaseValue'], t['currentPrice'], t['averageEntryPrice']])
         print table
 
     def print_breakdown(self, positions):
