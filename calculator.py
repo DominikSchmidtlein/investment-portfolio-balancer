@@ -1,80 +1,103 @@
 class Calculator:
-    def __init__(self, composition=None):
-        self.composition = composition if composition else {
-          "VE.TO": 0.23,
-          "VA.TO": 0.15,
-          "VEE.TO": 0.11,
-          "VCN.TO": 0.04,
-          "VUN.TO": 0.47
-        }
-        assert sum(self.composition.itervalues()) == 1
+    def balance(self, positions, balances):
+        """balance(list, dict) -> list, dict
 
-    def calculate_percentages(self, positions):
-        total_market_value = sum(p['currentMarketValue'] for p in positions)
-        positions_w_percentages = [{
-            'symbol': p['symbol'],
-            'marketValue': p['currentMarketValue'],
-            'actual %': p['currentMarketValue'] / total_market_value * 100,
-            'ideal %': self.composition[p['symbol']] * 100
-        } for p in positions]
-        positions_w_percentages.append({
+        list has dict with keys: 'composition', 'currentPrice', 'currentMarketValue'
+        dict has keys: 'totalEquity', 'cash', 'marketValue'
+
+        Return a copy of list with new keys:
+        'purchaseValue', 'purchaseQuantity', 'newMarketValue',
+        'before actual %', 'after actual %', 'ideal %'
+        Return a copy of dict with keys 'newCash', 'newMarketValue'
+        """
+        # calculate purchases
+        purchases = self._purchases(positions, balances)
+        # calculate post purchase balances
+        new_balances = self._new_balances(balances, purchases)
+        # compute percentages
+        self._percentages(purchases)
+        return purchases, new_balances
+
+    def _percentages(self, positions):
+        """percentages(list) -> list
+
+        list has dicts with keys: 'currentMarketValue', 'newMarketValue', 'composition'
+
+        Return a copy of list with new keys added to each dict:
+        'before actual %', 'after actual %', 'ideal %' and new entry 'Total'
+        """
+
+        c_total_value = float(sum(p['currentMarketValue'] for p in positions))
+        n_total_value = float(sum(p['newMarketValue'] for p in positions))
+
+        w_percent = []
+        for p in positions:
+            w_p = p.copy()
+            w_p['before actual %'] = p['currentMarketValue'] / c_total_value * 100
+            w_p['after actual %'] = p['newMarketValue'] / n_total_value * 100
+            w_p['ideal %'] = p['composition'] * 100
+            w_percent.append(w_p)
+        w_percent.append({
             'symbol': 'Total',
-            'marketValue': total_market_value,
-            'actual %': sum(p['actual %'] for p in positions_w_percentages),
-            'ideal %': sum(p['ideal %'] for p in positions_w_percentages)
+            'currentMarketValue': c_total_value,
+            'newMarketValue': n_total_value,
+            'before actual %': sum(p['before actual %'] for p in w_percent),
+            'after actual %': sum(p['after actual %'] for p in w_percent),
+            'ideal %': sum(p['ideal %'] for p in w_percent)
         })
-        return positions_w_percentages
+        return w_percent
 
-    def new_percentages(self, positions, purchases):
-        new_positions = [
-            {
-                'symbol': p['symbol'],
-                'currentMarketValue': p['currentMarketValue'] +
-                sum(x['purchaseValue'] for x in purchases if x['symbol'] == p['symbol'])
-            } for p in positions
-        ]
-        return self.calculate_percentages(new_positions)
+    def _new_balances(self, balances, purchases):
+        """new_balances(dict, list) -> dict
 
-    def new_balances(self, old_balances, purchases):
-        total_purchase_value = sum(p['purchaseValue'] for p in purchases)
-        return {
-            'cash': old_balances['cash'] - total_purchase_value,
-            'marketValue': old_balances['marketValue'] + total_purchase_value,
-            'totalEquity': old_balances['totalEquity']
-        }
+        dict has keys: 'cash', 'marketValue'
+        list has dict with key 'purchaseValue'
 
-    def purchases(self, positions, balances):
+        Return copy of dict with new keys: 'newCash', 'newMarketValue'
+        """
+        total_purchases = sum(p['purchaseValue'] for p in purchases)
+        # python3.6 {**balances, **{...}}
+        new_balances = balances.copy()
+        new_balances['newCash'] = balances['cash'] - total_purchases
+        new_balances['newMarketValue'] = balances['marketValue'] + total_purchases
+        return new_balances
+
+    def _purchases(self, positions, balances):
+        """purchases(list, dict) -> list
+
+        list must have dict with keys: 'composition', 'currentPrice', 'currentMarketValue'
+        dict must have keys: 'totalEquity', 'cash'
+
+        Return a copy of list with new keys: 'purchaseValue', 'purchaseQuantity', 'newMarketValue'
+        """
         # which securities are needed
-        needed_positions = filter(lambda position:
-            position['currentMarketValue'] < balances['totalEquity'] * self.composition[position['symbol']],
-            positions)
-        # calculate new composition
-        normalized_composition = self.__new_composition(needed_positions)
-        # how much equity do we have to work with
-        normalized_equity = sum(p['currentMarketValue'] for p in needed_positions) + balances['cash']
-        # what should we purchase
-        return map(lambda position: self.__needed_purchase_quantity(position, normalized_equity, normalized_composition),
-            needed_positions)
+        n_positions = []
+        composition_total = 0
+        normalized_equity = balances['cash']
+        for p in positions:
+            p = p.copy()
+            if p['currentMarketValue'] >= balances['totalEquity'] * p['composition']:
+                p['n_composition'] = 0
+            else:
+                p['n_composition'] = p['composition']
+                composition_total += p['n_composition']
+                normalized_equity += p['currentMarketValue']
+            n_positions.append(p)
 
-    def __new_composition(self, needed_positions):
-        needed_compositions = { p['symbol']: self.composition[p['symbol']] for p in needed_positions }
-        composition_total = sum(needed_compositions.itervalues())
-        normalized_composition = { k: v / composition_total for k, v in needed_compositions.items() }
-        assert int(sum(normalized_composition.itervalues())) == 1
-        return normalized_composition
-
-    def __needed_purchase_quantity(self, position, total_equity, composition):
-        theoretical_market_value = total_equity * composition[position['symbol']]
-        theoretical_purchase_value = max(theoretical_market_value - position['currentMarketValue'], 0)
-        assert theoretical_purchase_value > 0
-        theoretical_purchase_quantity = theoretical_purchase_value / position['currentPrice']
-        practical_purchase_quantity = int(theoretical_purchase_quantity // 10 * 10)
-        practical_purchase_value = practical_purchase_quantity * position['currentPrice']
-        return {
-            'symbol': position['symbol'],
-            'symbolId': position['symbolId'],
-            'currentPrice': position['currentPrice'],
-            'averageEntryPrice': position['averageEntryPrice'],
-            'purchaseValue': practical_purchase_value,
-            'purchaseQuantity': practical_purchase_quantity
-        }
+        for p in n_positions:
+            # normalized composition
+            p['n_composition'] /= composition_total
+            # theoretical market value
+            t_mv = normalized_equity * p['n_composition']
+            # theoretical purchase value
+            t_pv = max(t_mv - p['currentMarketValue'], 0)
+            # theoretical purchase quantity
+            t_pq = t_pv / p['currentPrice']
+            # practical purchase quantity
+            p['purchaseQuantity'] = int(t_pq // 10 * 10)
+            # practical purchase value
+            p['purchaseValue'] = p['purchaseQuantity'] * p['currentPrice']
+            # new market value
+            p['newMarketValue'] = p['currentMarketValue'] + p['purchaseValue']
+            del p['n_composition']
+        return n_positions
