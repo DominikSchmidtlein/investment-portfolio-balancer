@@ -18,10 +18,12 @@ def lambda_handler(event, context):
     # get portfolio balances
     balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]
     calculator = Calculator()
+    new_positions, new_balances = calculator.purchases(positions, balances)
+    
     purchases = calculator.purchases(positions, balances)
     # print portfolio
     printer = Printer()
-    printer.print_breakdown(calculator.calculate_percentages(positions))
+    printer.print_breakdown(calculator.percentages(positions))
     printer.print_transactions(purchases)
     printer.print_balances(balances, calculator.new_balances(balances, purchases))
     printer.print_breakdown(calculator.new_percentages(positions, purchases))
