@@ -15,8 +15,7 @@ class Calculator:
         # calculate post purchase balances
         new_balances = self._new_balances(balances, purchases)
         # compute percentages
-        self._percentages(purchases)
-        return purchases, new_balances
+        return self._percentages(purchases), new_balances
 
     def _percentages(self, positions):
         """percentages(list) -> list
@@ -24,7 +23,7 @@ class Calculator:
         list has dicts with keys: 'currentMarketValue', 'newMarketValue', 'composition'
 
         Return a copy of list with new keys added to each dict:
-        'before actual %', 'after actual %', 'ideal %' and new entry 'Total'
+        'before actual %', 'after actual %', 'ideal %'
         """
 
         c_total_value = float(sum(p['currentMarketValue'] for p in positions))
@@ -37,14 +36,6 @@ class Calculator:
             w_p['after actual %'] = p['newMarketValue'] / n_total_value * 100
             w_p['ideal %'] = p['composition'] * 100
             w_percent.append(w_p)
-        w_percent.append({
-            'symbol': 'Total',
-            'currentMarketValue': c_total_value,
-            'newMarketValue': n_total_value,
-            'before actual %': sum(p['before actual %'] for p in w_percent),
-            'after actual %': sum(p['after actual %'] for p in w_percent),
-            'ideal %': sum(p['ideal %'] for p in w_percent)
-        })
         return w_percent
 
     def _new_balances(self, balances, purchases):

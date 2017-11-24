@@ -3,6 +3,15 @@ from questradeclient import QuestradeClient
 from calculator import Calculator
 from printer import Printer
 
+COMPOSITION = {
+    "VE.TO": 0.23,
+    "VA.TO": 0.15,
+    "VEE.TO": 0.11,
+    "VCN.TO": 0.04,
+    "VUN.TO": 0.47
+}
+assert sum(COMPOSITION.itervalues()) == 1
+
 def lambda_handler(event, context):
     # retrieve config
     configmanager = ConfigManager()
@@ -15,18 +24,20 @@ def lambda_handler(event, context):
     # get portfolio positions
     positions = qclient.get_positions(False,
         ['currentPrice', 'openQuantity', 'symbol', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
+    for p in positions:
+        p['composition'] = COMPOSITION.get(p['symbol'], 0)
+
     # get portfolio balances
     balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]
     calculator = Calculator()
-    new_positions, new_balances = calculator.purchases(positions, balances)
-    
-    purchases = calculator.purchases(positions, balances)
+    purchases, new_balances = calculator.balance(positions, balances)
+
     # print portfolio
     printer = Printer()
-    printer.print_breakdown(calculator.percentages(positions))
+    # printer.print_breakdown(calculator.percentages(positions))
     printer.print_transactions(purchases)
-    printer.print_balances(balances, calculator.new_balances(balances, purchases))
-    printer.print_breakdown(calculator.new_percentages(positions, purchases))
+    printer.print_balances(new_balances)
+    # printer.print_breakdown(calculator.new_percentages(positions, purchases))
 
 if __name__ == '__main__':
     lambda_handler(None, None)
