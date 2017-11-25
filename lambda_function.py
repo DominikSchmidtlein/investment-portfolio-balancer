@@ -34,10 +34,8 @@ def lambda_handler(event, context):
 
     # print portfolio
     printer = Printer()
-    # printer.print_breakdown(calculator.percentages(positions))
     printer.print_transactions(purchases)
     printer.print_balances(new_balances)
-    # printer.print_breakdown(calculator.new_percentages(positions, purchases))
 
 if __name__ == '__main__':
     lambda_handler(None, None)
