@@ -5,30 +5,27 @@ class Printer:
         pass
 
     def print_transactions(self, transactions):
-        columns = ['Symbol', 'Purchase Quantity', 'Purchase Value', 'Current Price', 'Average Entry Price']
-        f = self._formatter(2)
+        columns = ['Symbol', 'I%', 'CP', 'AP', 'CQ', 'CMV', 'C%', 'PQ', 'PV', 'NQ', 'NMV', 'N%']
         table = PrettyTable(columns)
         table.align.update({ c: 'r' for c in columns[1:] })
+        f = self._formatter(2)
         for t in transactions:
             table.add_row([t['symbol'],
+                           f(t['ideal %']),
+                           f(t['currentPrice']),
+                           f(t['averageEntryPrice']),
+                           t['openQuantity'],
+                           f(t['currentMarketValue']),
+                           f(t['before actual %']),
                            t['purchaseQuantity'],
                            f(t['purchaseValue']),
-                           f(t['currentPrice']),
-                           f(t['averageEntryPrice'])])
+                           f(t['newQuantity']),
+                           f(t['newMarketValue']),
+                           f(t['after actual %'])])
         print table
-
-    def print_breakdown(self, positions):
-        columns = ['Symbol', 'Market Value (CAD)', 'Actual %', 'Ideal %']
-        f = self._formatter(2)
-        table = PrettyTable(columns)
-        table.align.update({ c: 'r' for c in columns[1:] })
-        for p in positions:
-            table.add_row([
-                p['symbol'],
-                f(p['marketValue']),
-                f(p['actual %']),
-                f(p['ideal %'])])
-        print table
+        print ('I%: Ideal %, CP: Current Price, AP: Average Price, CQ: Current Quantity,'
+               'CMV: Current Market Value, C%: Current %, PQ: Purchase Quantity,'
+               'PV: Purchase Value, NQ: New Quantity, NMV: New Market Value, N%: New %')
 
     def print_balances(self, balances):
         columns = ['Balance', 'Before', 'After']

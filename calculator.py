@@ -2,11 +2,12 @@ class Calculator:
     def balance(self, positions, balances):
         """balance(list, dict) -> list, dict
 
-        list has dict with keys: 'composition', 'currentPrice', 'currentMarketValue'
+        list has dict with keys:
+        'composition', 'currentPrice', 'currentMarketValue', 'openQuantity'
         dict has keys: 'totalEquity', 'cash', 'marketValue'
 
         Return a copy of list with new keys:
-        'purchaseValue', 'purchaseQuantity', 'newMarketValue',
+        'purchaseValue', 'purchaseQuantity', 'newMarketValue', 'newQuantity'
         'before actual %', 'after actual %', 'ideal %'
         Return a copy of dict with keys 'newCash', 'newMarketValue'
         """
@@ -15,9 +16,9 @@ class Calculator:
         # calculate post purchase balances
         new_balances = self._new_balances(balances, purchases)
         # compute percentages
-        return self._percentages(purchases), new_balances
+        return self._percentages(purchases, balances['totalEquity']), new_balances
 
-    def _percentages(self, positions):
+    def _percentages(self, positions, total_equity):
         """percentages(list) -> list
 
         list has dicts with keys: 'currentMarketValue', 'newMarketValue', 'composition'
@@ -26,14 +27,11 @@ class Calculator:
         'before actual %', 'after actual %', 'ideal %'
         """
 
-        c_total_value = float(sum(p['currentMarketValue'] for p in positions))
-        n_total_value = float(sum(p['newMarketValue'] for p in positions))
-
         w_percent = []
         for p in positions:
             w_p = p.copy()
-            w_p['before actual %'] = p['currentMarketValue'] / c_total_value * 100
-            w_p['after actual %'] = p['newMarketValue'] / n_total_value * 100
+            w_p['before actual %'] = 100.0 * p['currentMarketValue'] / total_equity
+            w_p['after actual %'] = 100.0 * p['newMarketValue'] / total_equity
             w_p['ideal %'] = p['composition'] * 100
             w_percent.append(w_p)
         return w_percent
@@ -56,10 +54,12 @@ class Calculator:
     def _purchases(self, positions, balances):
         """purchases(list, dict) -> list
 
-        list must have dict with keys: 'composition', 'currentPrice', 'currentMarketValue'
+        list must have dict with keys:
+        'composition', 'currentPrice', 'currentMarketValue', 'openQuantity'
         dict must have keys: 'totalEquity', 'cash'
 
-        Return a copy of list with new keys: 'purchaseValue', 'purchaseQuantity', 'newMarketValue'
+        Return a copy of list with new keys:
+        'purchaseValue', 'purchaseQuantity', 'newMarketValue', 'newQuantity'
         """
         # which securities are needed
         n_positions = []
@@ -90,5 +90,7 @@ class Calculator:
             p['purchaseValue'] = p['purchaseQuantity'] * p['currentPrice']
             # new market value
             p['newMarketValue'] = p['currentMarketValue'] + p['purchaseValue']
+            # new quantity
+            p['newQuantity'] = p['openQuantity'] + p['purchaseQuantity']
             del p['n_composition']
         return n_positions
