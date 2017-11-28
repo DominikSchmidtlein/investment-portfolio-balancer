@@ -10,7 +10,7 @@ COMPOSITION = {
     "VCN.TO": 0.04,
     "VUN.TO": 0.47
 }
-assert sum(COMPOSITION.itervalues()) == 1
+assert sum(COMPOSITION.values()) == 1
 
 def lambda_handler(event, context):
     # retrieve config

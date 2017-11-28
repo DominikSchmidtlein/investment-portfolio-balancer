@@ -30,8 +30,8 @@ class QuestradeClient:
 			return json
 		elif not currencies and not attributes:
 			return json["perCurrencyBalances"]
-		return map(lambda c: { k: v for k, v in c.items() if k in attributes },
-			filter(lambda c: c['currency'] in currencies, json["perCurrencyBalances"]))
+		return [{ k: v for k, v in c.items() if k in attributes }
+			for c in (c for c in json["perCurrencyBalances"] if c['currency'] in currencies)]
 
 	def get_positions(self, raw=True, attributes=None):
 		url = "{s.api_server}v1/accounts/{s.account_id}/positions".format(s=self)
@@ -42,8 +42,7 @@ class QuestradeClient:
 			return json
 		elif not attributes:
 			return json['positions']
-		return map(lambda p: { k: v for k, v in p.items() if k in attributes },
-			json['positions'])
+		return [{ k: v for k, v in p.items() if k in attributes } for p in json['positions']]
 
 	def market_purchase(self, symbolId, quantity):
 		if quantity <= 0:

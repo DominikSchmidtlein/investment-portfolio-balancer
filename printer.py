@@ -22,10 +22,10 @@ class Printer:
                            f(t['newQuantity']),
                            f(t['newMarketValue']),
                            f(t['after actual %'])])
-        print table
-        print ('I%: Ideal %, CP: Current Price, AP: Average Price, CQ: Current Quantity,'
-               'CMV: Current Market Value, C%: Current %, PQ: Purchase Quantity,'
-               'PV: Purchase Value, NQ: New Quantity, NMV: New Market Value, N%: New %')
+        print(table)
+        print('I%: Ideal %, CP: Current Price, AP: Average Price, CQ: Current Quantity, '
+              'CMV: Current Market Value, C%: Current %, PQ: Purchase Quantity, '
+              'PV: Purchase Value, NQ: New Quantity, NMV: New Market Value, N%: New %')
 
     def print_balances(self, balances):
         columns = ['Balance', 'Before', 'After']
@@ -35,7 +35,7 @@ class Printer:
         table.add_row(['Cash',         f(balances['cash']),        f(balances['newCash'])])
         table.add_row(['Market Value', f(balances['marketValue']), f(balances['newMarketValue'])])
         table.add_row(['Total Equity', f(balances['totalEquity']), f(balances['totalEquity'])])
-        print table
+        print(table)
 
     def _formatter(self, decimals):
         def f(value):
