@@ -1,0 +1,19 @@
+[{
+    "composition": 0.3,
+    "currentPrice": 2,
+    "currentMarketValue": 500,
+    "openQuantity": 250
+  },
+  {
+    "composition": 0.3,
+    "currentPrice": 1,
+    "currentMarketValue": 150,
+    "openQuantity": 150
+  },
+  {
+    "composition": 0.4,
+    "currentPrice": 5,
+    "currentMarketValue": 0,
+    "openQuantity": 0
+  }
+]

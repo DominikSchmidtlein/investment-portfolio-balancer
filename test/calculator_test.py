@@ -1,94 +1,91 @@
-from calculator import Calculator
 import unittest
+from random import random, randint
+from copy import deepcopy
+import json
+from calculator import Calculator
 
 class CalculatorTest(unittest.TestCase):
+    DATA_PATH = 'test/testdata/calculator_test/'
+
     def setUp(self):
         self.calculator = Calculator()
 
-    def test_balance(self):
-        position_keys = ('composition', 'currentPrice', 'currentMarketValue', 'openQuantity')
-        position_values = ((.2, 1, 100, 100), (.3, 2, 200, 100), (.5, .5, 50, 100))
-        positions = self._generate_list_of_dict(position_keys, position_values)
-        balances = { 'totalEquity': 1000, 'marketValue': 350, 'cash': 650 }
-        # expected purchases keys
-        expected_p_k = ('composition', 'currentPrice', 'currentMarketValue', 'openQuantity',
-                        'purchaseValue', 'purchaseQuantity', 'newMarketValue', 'newQuantity',
-                        'before actual %', 'after actual %', 'ideal %')
-        # expected purchases values
-        expected_p_v = ((.2,  1, 100, 100, 100, 100, 200, 200, 10, 20, 20),
-                        (.3,  2, 200, 100, 100,  50, 300, 150, 20, 30, 30),
-                        (.5, .5,  50, 100, 450, 900, 500,1000,  5, 50, 50))
-        # expected purchases
-        expected_p = self._generate_list_of_dict(expected_p_k, expected_p_v)
+    # python3.6 -m unittest test.calculator_test.CalculatorTest.test_balance_random_inputs
+    def test_balance_random_inputs(self):
+        rands = [random() for _ in range(randint(1,5))]
+        tot = sum(rands)
+        norm = [r / tot for r in rands]
 
-        expected_balances = balances.copy()
-        expected_balances.update({ 'newCash': 0, 'newMarketValue': 1000 })
+        positions = []
+        marketValue = 0
+        for r in rands:
+            price = random() * 100.0
+            quantity = randint(0, 100)
+            currentMarketValue = price * quantity
+            marketValue += currentMarketValue
+            positions.append({
+                'composition': r/tot,
+                'currentPrice': price,
+                'openQuantity': quantity,
+                'currentMarketValue': currentMarketValue
+            })
+        cash = randint(0, 2000)
+        balances = { 'totalEquity': cash + marketValue, 'marketValue': marketValue, 'cash': cash }
+
+        purchases, new_balances = self.calculator.balance(positions, balances.copy())
+
+        try:
+            # test that
+            self.assertEqual(balances, { k: v for k, v in new_balances.items() if k in balances.keys() })
+            self.assertEqual(positions, [{k:v for k,v in p.items() if k in positions[0].keys()} for p in purchases])
+
+            self.assertAlmostEqual(1, sum((p['composition'] for p in positions)))
+            self.assertTrue(new_balances['cash'] >= (sum(p['purchaseValue'] for p in purchases)))
+        except AssertionError:
+            print(json.dumps(purchases, indent=1))
+            print(json.dumps(new_balances, indent=1))
+            print(sum(p['purchaseValue'] for p in purchases))
+            raise
+
+    def test_balance(self):
+        self._test_balance(directory_path='test_balance/')
+
+    def test_balance_all_needed(self):
+        self._test_balance(directory_path='test_balance_all_needed/')
+
+    def test_balance_not_all_needed(self):
+        self._test_balance(directory_path='test_balance_not_all_needed/')
+
+    def _test_balance(self,
+                      directory_path,
+                      inputs_directory='inputs/',
+                      outputs_directory='outputs/',
+                      positions_filename='positions.json',
+                      balances_filename='balances.json',
+                      purchases_filename='purchases.json',
+                      new_balances_filename='new_balances.json'):
+
+        input_dir_path = directory_path + inputs_directory
+        output_dir_path = directory_path + outputs_directory
+
+        positions = self._data(input_dir_path, positions_filename)
+        balances = self._data(input_dir_path, balances_filename)
 
         purchases, new_balances = self.calculator.balance(positions, balances)
 
-        self.assertEqual(expected_p, purchases)
-        self.assertEqual(expected_balances, new_balances)
+        # expected purchases
+        x_purchases = self._data(output_dir_path, purchases_filename)
+        # expected balances
+        x_balances = self._data(output_dir_path, new_balances_filename)
 
-    def test_new_balances(self):
-        balances = { 'cash': 5, 'marketValue': 5, 'totalEquity': 10 }
-        purchases = [{ 'purchaseValue': 1 } for _ in range(4)]
-        # python3.6 { **balances, **{ 'newCash': 1, 'newMarketValue': 9 } }
-        expected = { 'cash':    5, 'marketValue':    5, 'totalEquity': 10,
-                     'newCash': 1, 'newMarketValue': 9 }
-        result = self.calculator._new_balances(balances, purchases)
-        self.assertEqual(expected, result)
+        self.assertEqual(x_purchases, purchases)
+        self.assertEqual(x_balances, new_balances)
 
-    def test_percentages(self):
-        total_equity = 20
-        position_values = ((.3, 6, 10, 30, 50, 30),
-                           (.3, 2,  0, 10,  0, 30),
-                           (.4, 2, 10, 10, 50, 40))
-        positions = []
-        expected = []
-        for a, b, c, d, e, f in position_values:
-            x = { 'composition': a, 'currentMarketValue': b, 'newMarketValue': c }
-            # python3.6 { **x, **{} }
-            y = x.copy()
-            y.update({ 'before actual %': d, 'after actual %': e, 'ideal %': f })
-            positions.append(x)
-            expected.append(y)
-        result = self.calculator._percentages(positions, total_equity)
-        self.assertEqual(expected, result)
-
-    def test_purchases_all_needed(self):
-        positions = [{'composition': .3, 'currentPrice': 2, 'currentMarketValue': 150, 'openQuantity':  75},
-                     {'composition': .3, 'currentPrice': 1, 'currentMarketValue': 250, 'openQuantity': 250},
-                     {'composition': .4, 'currentPrice': 5, 'currentMarketValue': 250, 'openQuantity':  50}]
-        balances = { 'cash': 350, 'marketValue': 650, 'totalEquity': 1000 }
-        expected_keys = ('composition', 'currentPrice', 'currentMarketValue', 'openQuantity',
-                         'purchaseValue', 'purchaseQuantity', 'newMarketValue', 'newQuantity')
-        expected_values = ((.3, 2, 150,  75, 140, 70, 290, 145),
-                           (.3, 1, 250, 250,  50, 50, 300, 300),
-                           (.4, 5, 250,  50, 150, 30, 400, 80))
-        expected = self._generate_list_of_dict(expected_keys, expected_values)
-        result = self.calculator._purchases(positions, balances)
-        self.assertEqual(expected, result)
-
-    def test_purchases_not_all_needed(self):
-        positions = [{'composition': .3, 'currentPrice': 2, 'currentMarketValue': 500, 'openQuantity': 250},
-                     {'composition': .3, 'currentPrice': 1, 'currentMarketValue': 150, 'openQuantity': 150},
-                     {'composition': .4, 'currentPrice': 5, 'currentMarketValue':   0, 'openQuantity':   0}]
-        balances = { 'cash': 350, 'marketValue': 650, 'totalEquity': 1000 }
-
-        # python3.6 => { **positions[0], **{'purchaseValue': 0} }
-        expected_keys = ('composition', 'currentPrice', 'currentMarketValue', 'openQuantity',
-                         'purchaseValue', 'purchaseQuantity', 'newMarketValue', 'newQuantity')
-        expected_values = [(.3, 2, 500, 250,   0,  0, 500, 250),
-                           (.3, 1, 150, 150,  60, 60, 210, 210),
-                           (.4, 5,   0,   0, 250, 50, 250,  50)]
-        expected = self._generate_list_of_dict(expected_keys, expected_values)
-        result = self.calculator._purchases(positions, balances)
-        self.assertEqual(expected, result)
-
-    def _generate_list_of_dict(self, keys, values):
-        return [{ key: entry[i] for i, key in enumerate(keys) } for entry in values]
+    def _data(self, directory, filename):
+        with open(self.DATA_PATH + directory + filename) as f:
+            return json.load(f)
 
 if __name__ == '__main__':
     unittest.main()
 
-# python -m test.calculator_test
+# python3.6 -m test.calculator_test

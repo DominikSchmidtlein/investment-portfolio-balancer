@@ -1,0 +1,37 @@
+[{
+  "composition": 0.3,
+  "currentPrice": 2,
+  "currentMarketValue": 150,
+  "openQuantity": 75,
+  "purchaseValue": 140,
+  "purchaseQuantity": 70,
+  "newMarketValue": 290,
+  "newQuantity": 145,
+  "before actual %": 15,
+  "after actual %": 29,
+  "ideal %": 30
+}, {
+  "composition": 0.3,
+  "currentPrice": 1,
+  "currentMarketValue": 250,
+  "openQuantity": 250,
+  "purchaseValue": 50,
+  "purchaseQuantity": 50,
+  "newMarketValue": 300,
+  "newQuantity": 300,
+  "before actual %": 25,
+  "after actual %": 30,
+  "ideal %": 30
+}, {
+  "composition": 0.4,
+  "currentPrice": 5,
+  "currentMarketValue": 250,
+  "openQuantity": 50,
+  "purchaseValue": 150,
+  "purchaseQuantity": 30,
+  "newMarketValue": 400,
+  "newQuantity": 80,
+  "before actual %": 25,
+  "after actual %": 40,
+  "ideal %": 40
+}]
