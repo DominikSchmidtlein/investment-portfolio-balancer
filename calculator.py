@@ -26,16 +26,15 @@ class Calculator:
             n_p['purchaseQuantity'] = 0
             n_p['newMarketValue'] = p['currentMarketValue']
             n_p['newQuantity'] = p['openQuantity']
-            # theoretical market value
-            n_p['tMV'] = balances['totalEquity'] * p['composition']
+            n_p['allocation'] = balances['totalEquity'] * p['composition']
             purchases.append(n_p)
 
         # purchasable positions
         p_p = purchases[:]
         while p_p:
-            p = max(p_p, key=lambda x: x['tMV'] - x['newMarketValue'])
+            p = max(p_p, key=lambda x: x['allocation'] - x['newMarketValue'])
             cost = p['currentPrice'] * min_quantity
-            needed = p['tMV'] >= p['newMarketValue'] + cost
+            needed = p['allocation'] >= p['newMarketValue'] + cost
             if needed and cost <= new_balances['newCash']:
                 p['purchaseQuantity'] += min_quantity
                 p['purchaseValue'] += cost
@@ -44,7 +43,6 @@ class Calculator:
                 new_balances['newCash'] -= cost
                 new_balances['newMarketValue'] += cost
             else:
-                del p['tMV']
                 p_p.remove(p)
         return self._percentages(purchases, balances['totalEquity']), new_balances
 

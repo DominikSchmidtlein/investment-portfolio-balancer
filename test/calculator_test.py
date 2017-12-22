@@ -12,40 +12,77 @@ class CalculatorTest(unittest.TestCase):
 
     # python3.6 -m unittest test.calculator_test.CalculatorTest.test_balance_random_inputs
     def test_balance_random_inputs(self):
+        positions, balances = self._generate_random_inputs()
+
+        positions_c = deepcopy(positions)
+        balances_c = balances.copy()
+
+        purchases, new_balances = self.calculator.balance(positions_c, balances_c)
+
+        # test inputs haven't been modified
+        self.assertEqual(positions, positions_c)
+        self.assertEqual(balances, balances_c)
+        # test common values are consistent between input and output
+        self.assertEqual(balances, { k: v for k, v in new_balances.items() if k in balances.keys() })
+        self.assertEqual(positions, [{k:v for k,v in p.items() if k in positions[0].keys()} for p in purchases])
+
+        self.assertAlmostEqual(1, sum((p['composition'] for p in purchases)))
+
+        # test new_balances
+        self.assertEqual(new_balances['totalEquity'], new_balances['marketValue'] + new_balances['cash'])
+        self.assertAlmostEqual(new_balances['totalEquity'], new_balances['newMarketValue'] + new_balances['newCash'])
+        self.assertTrue(new_balances['newMarketValue'] >= new_balances['marketValue'])
+
+        s_currentMarketValue = 0
+        s_purchaseValue = 0
+        s_newMarketValue = 0
+        # test purchases
+        for p in purchases:
+            self.assertTrue(p['purchaseQuantity'] >= 0)
+            self.assertAlmostEqual(p['currentMarketValue'], p['currentPrice'] * p['openQuantity'])
+            self.assertAlmostEqual(p['purchaseValue'], p['currentPrice'] * p['purchaseQuantity'])
+            self.assertAlmostEqual(p['newMarketValue'], p['currentPrice'] * p['newQuantity'])
+            self.assertEqual(p['newQuantity'], p['openQuantity'] + p['purchaseQuantity'])
+            self.assertAlmostEqual(p['newMarketValue'], p['currentMarketValue'] + p['purchaseValue'])
+            self.assertTrue(p['newMarketValue'] >= p['currentMarketValue'])
+
+            if p['allocation'] > p['currentMarketValue']:
+                self.assertTrue(p['allocation'] >= p['newMarketValue'])
+            else:
+                self.assertEqual(0, p['purchaseValue'])
+
+            s_currentMarketValue += p['currentMarketValue']
+            s_purchaseValue += p['purchaseValue']
+            s_newMarketValue += p['newMarketValue']
+
+        # cross reference purchases and new_balances
+        self.assertAlmostEqual(new_balances['marketValue'], s_currentMarketValue)
+        self.assertAlmostEqual(new_balances['newMarketValue'], s_newMarketValue)
+        self.assertAlmostEqual(s_newMarketValue, s_currentMarketValue + s_purchaseValue)
+        self.assertAlmostEqual(new_balances['newCash'], new_balances['cash'] - s_purchaseValue)
+        self.assertTrue(new_balances['cash'] >= s_purchaseValue)
+
+    def _generate_random_inputs(self):
+        # get random number of random numbers
         rands = [random() for _ in range(randint(1,5))]
         tot = sum(rands)
-        norm = [r / tot for r in rands]
 
         positions = []
-        marketValue = 0
+        balances = { 'marketValue': 0 }
         for r in rands:
             price = random() * 100.0
             quantity = randint(0, 100)
             currentMarketValue = price * quantity
-            marketValue += currentMarketValue
+            balances['marketValue'] += currentMarketValue
             positions.append({
                 'composition': r/tot,
                 'currentPrice': price,
                 'openQuantity': quantity,
                 'currentMarketValue': currentMarketValue
             })
-        cash = randint(0, 2000)
-        balances = { 'totalEquity': cash + marketValue, 'marketValue': marketValue, 'cash': cash }
-
-        purchases, new_balances = self.calculator.balance(positions, balances.copy())
-
-        try:
-            # test that
-            self.assertEqual(balances, { k: v for k, v in new_balances.items() if k in balances.keys() })
-            self.assertEqual(positions, [{k:v for k,v in p.items() if k in positions[0].keys()} for p in purchases])
-
-            self.assertAlmostEqual(1, sum((p['composition'] for p in positions)))
-            self.assertTrue(new_balances['cash'] >= (sum(p['purchaseValue'] for p in purchases)))
-        except AssertionError:
-            print(json.dumps(purchases, indent=1))
-            print(json.dumps(new_balances, indent=1))
-            print(sum(p['purchaseValue'] for p in purchases))
-            raise
+        balances['cash'] = randint(0, 2000)
+        balances['totalEquity'] =  balances['cash'] + balances['marketValue']
+        return positions, balances
 
     def test_balance(self):
         self._test_balance(directory_path='test_balance/')
