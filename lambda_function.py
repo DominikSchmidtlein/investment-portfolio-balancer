@@ -1,7 +1,7 @@
-from configmanager import ConfigManager
-from questradeclient import QuestradeClient
-from calculator import Calculator
-from printer import Printer
+from balancer.configmanager import ConfigManager
+from balancer.questradeclient import QuestradeClient
+from balancer.calculator import Calculator
+from balancer.printer import Printer
 
 COMPOSITION = {
     "VE.TO": 0.23,
