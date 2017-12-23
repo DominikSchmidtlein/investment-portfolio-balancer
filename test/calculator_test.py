@@ -2,7 +2,7 @@ import unittest
 from random import random, randint
 from copy import deepcopy
 import json
-from calculator import Calculator
+from balancer.calculator import Calculator
 
 class CalculatorTest(unittest.TestCase):
     DATA_PATH = 'test/testdata/calculator_test/'

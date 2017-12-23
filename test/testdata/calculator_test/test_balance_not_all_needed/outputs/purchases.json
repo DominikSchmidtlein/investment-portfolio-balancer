@@ -9,7 +9,8 @@
   "newQuantity": 250,
   "before actual %": 50,
   "after actual %": 50,
-  "ideal %": 30
+  "ideal %": 30,
+  "allocation": 300
 }, {
   "composition": 0.3,
   "currentPrice": 1,
@@ -21,7 +22,8 @@
   "newQuantity": 200,
   "before actual %": 15,
   "after actual %": 20,
-  "ideal %": 30
+  "ideal %": 30,
+  "allocation": 300
 }, {
   "composition": 0.4,
   "currentPrice": 5,
@@ -33,5 +35,6 @@
   "newQuantity": 60,
   "before actual %": 0,
   "after actual %": 30,
-  "ideal %": 40
+  "ideal %": 40,
+  "allocation": 400
 }]
