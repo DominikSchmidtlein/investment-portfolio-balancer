@@ -18,6 +18,11 @@ uninstall:
 run:
 	pipenv run python3.6 ./lambda_function.py
 
+# Run the tests
+.PHONY: test
+test:
+	pipenv run python3.6 -m test.calculator_test
+
 # Clean delivrable
 clean:
 	rm -f ${DELIVERABLE}
