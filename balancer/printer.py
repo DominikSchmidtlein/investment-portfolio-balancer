@@ -9,8 +9,8 @@ class Printer:
         table = PrettyTable(columns)
         table.align.update({ c: 'r' for c in columns[1:] })
         f = self._formatter(2)
-        for t in transactions:
-            table.add_row([t['symbol'],
+        for s, t in transactions.items():
+            table.add_row([s,
                            f(t['ideal %']),
                            f(t['currentPrice']),
                            f(t['averageEntryPrice']),
