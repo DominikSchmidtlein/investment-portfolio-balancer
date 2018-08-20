@@ -4,13 +4,13 @@ from balancer.calculator import Calculator
 from balancer.printer import Printer
 
 COMPOSITION = {
-    "VE.TO": 0.23,
-    "VA.TO": 0.15,
-    "VEE.TO": 0.11,
-    "VCN.TO": 0.04,
-    "VUN.TO": 0.47
+    "VE.TO": { 'composition': 0.23 },
+    "VA.TO": { 'composition': 0.15 },
+    "VEE.TO": { 'composition': 0.11 },
+    "VCN.TO": { 'composition': 0.04 },
+    "VUN.TO": { 'composition': 0.47 }
 }
-assert sum(COMPOSITION.values()) == 1
+assert sum(v['composition'] for _, v in COMPOSITION.items()) == 1
 
 def lambda_handler(event, context):
     # retrieve config
@@ -23,9 +23,18 @@ def lambda_handler(event, context):
     configmanager.put_config(config)
     # get portfolio positions
     positions = qclient.get_positions(False,
-        ['currentPrice', 'openQuantity', 'symbol', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
-    for p in positions:
-        p['composition'] = COMPOSITION.get(p['symbol'], 0)
+        ['currentPrice', 'openQuantity', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
+
+    for symbol in set().union(positions.keys(), COMPOSITION.keys()):
+        position = { 'composition': 0, **COMPOSITION.get(symbol, {}) }
+        if symbol in positions:
+            position.update(positions[symbol])
+        else:
+            position.update({ 'openQuantity': 0, 'currentMarketValue': 0, 'averageEntryPrice': 'N/A' })
+            symbol_id = qclient.get_symbol(symbol, ['symbolId'])['symbolId']
+            current_price = qclient.get_quote(symbol_id, ['lastTradePrice'])['lastTradePrice']
+            position.update({ 'symbolId': symbol_id, 'currentPrice': current_price })
+        positions.update({ symbol: position })
 
     # get portfolio balances
     balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]

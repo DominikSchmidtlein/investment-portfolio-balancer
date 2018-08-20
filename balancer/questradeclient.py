@@ -42,7 +42,7 @@ class QuestradeClient:
 			return json
 		elif not attributes:
 			return json['positions']
-		return [{ k: v for k, v in p.items() if k in attributes } for p in json['positions']]
+		return { p['symbol']: { k: v for k, v in p.items() if k in attributes } for p in json['positions'] }
 
 	def market_purchase(self, symbolId, quantity):
 		if quantity <= 0:
@@ -62,6 +62,27 @@ class QuestradeClient:
 		response = requests.post(url, headers=self.__post_request_headers(), json=data)
 		response.raise_for_status()
 		return response.json()
+
+	def get_symbol(self, symbol, attributes=None):
+		url = "{s.api_server}v1/symbols".format(s=self)
+		response = requests.get(url, headers=self.__get_request_headers(), params={'names': symbol})
+		response.raise_for_status()
+		json = response.json()['symbols'][0]
+		if not attributes:
+			return json
+		else:
+			return { k: v for k, v in json.items() if k in attributes }
+
+	def get_quote(self, symbol_id, attributes=None):
+		url = "{s.api_server}v1/markets/quotes/{symbol_id}".format(s=self, symbol_id=symbol_id)
+		response = requests.get(url, headers=self.__get_request_headers())
+		response.raise_for_status()
+		json = response.json()['quotes'][0]
+		if not attributes:
+			return json
+		else:
+			return { k: v for k, v in json.items() if k in attributes }
+
 
 	def __get_request_headers(self):
 		return {
