@@ -1,38 +1,38 @@
 class Calculator:
     def balance(self, positions, balances, min_quantity=10):
-        """balance(list, dict) -> list, dict
+        """balance(dict1, dict2) -> list, dict
 
-        list has dict with keys:
+        dict1 has nested dict with keys:
         'composition', 'currentPrice', 'currentMarketValue', 'openQuantity'
-        dict has keys: 'totalEquity', 'cash', 'marketValue'
+        dict2 has keys: 'totalEquity', 'cash', 'marketValue'
 
-        Return a copy of list with new keys:
+        Return a copy of dict with new nested keys:
         'purchaseValue', 'purchaseQuantity', 'newMarketValue', 'newQuantity'
         'before actual %', 'after actual %', 'ideal %'
         Return a copy of dict with keys 'newCash', 'newMarketValue'
         """
-
-        # import pdb; pdb.set_trace()
 
         # calculate purchases
         new_balances = balances.copy()
         new_balances['newCash'] = balances['cash']
         new_balances['newMarketValue'] = balances['marketValue']
 
-        purchases = []
-        for p in positions:
+        purchases = {}
+        for s, p in positions.items():
             n_p = p.copy()
             n_p['purchaseValue'] = 0
             n_p['purchaseQuantity'] = 0
             n_p['newMarketValue'] = p['currentMarketValue']
             n_p['newQuantity'] = p['openQuantity']
             n_p['allocation'] = balances['totalEquity'] * p['composition']
-            purchases.append(n_p)
+            purchases[s] = n_p
 
         # purchasable positions
-        p_p = purchases[:]
+        p_p = purchases.copy()
         while p_p:
-            p = max(p_p, key=lambda x: x['allocation'] - x['newMarketValue'])
+            # retrieve the position that is furthest from the desired allocation
+            symbol = max(p_p, key=lambda x: p_p[x]['allocation'] - p_p[x]['newMarketValue'])
+            p = p_p[symbol]
             cost = p['currentPrice'] * min_quantity
             needed = p['allocation'] >= p['newMarketValue'] + cost
             if needed and cost <= new_balances['newCash']:
@@ -43,23 +43,23 @@ class Calculator:
                 new_balances['newCash'] -= cost
                 new_balances['newMarketValue'] += cost
             else:
-                p_p.remove(p)
+                del p_p[symbol]
         return self._percentages(purchases, balances['totalEquity']), new_balances
 
     def _percentages(self, positions, total_equity):
-        """percentages(list) -> list
+        """percentages(dict) -> dict
 
-        list has dicts with keys: 'currentMarketValue', 'newMarketValue', 'composition'
+        dict has nested dicts with keys: 'currentMarketValue', 'newMarketValue', 'composition'
 
-        Return a copy of list with new keys added to each dict:
+        Return a copy of dict with new keys added to each nested dict:
         'before actual %', 'after actual %', 'ideal %'
         """
 
-        w_percent = []
-        for p in positions:
+        w_percent = {}
+        for s, p in positions.items():
             w_p = p.copy()
             w_p['before actual %'] = 100.0 * p['currentMarketValue'] / total_equity
             w_p['after actual %'] = 100.0 * p['newMarketValue'] / total_equity
             w_p['ideal %'] = p['composition'] * 100
-            w_percent.append(w_p)
+            w_percent[s] = w_p
         return w_percent

@@ -24,9 +24,9 @@ class CalculatorTest(unittest.TestCase):
         self.assertEqual(balances, balances_c)
         # test common values are consistent between input and output
         self.assertEqual(balances, { k: v for k, v in new_balances.items() if k in balances.keys() })
-        self.assertEqual(positions, [{k:v for k,v in p.items() if k in positions[0].keys()} for p in purchases])
+        self.assertEqual(positions, {s: {k: v for k, v in p.items() if k in next(iter(positions.values()))} for s, p in purchases.items()})
 
-        self.assertAlmostEqual(1, sum((p['composition'] for p in purchases)))
+        self.assertAlmostEqual(1, sum((p['composition'] for _, p in purchases.items())))
 
         # test new_balances
         self.assertEqual(new_balances['totalEquity'], new_balances['marketValue'] + new_balances['cash'])
@@ -37,7 +37,7 @@ class CalculatorTest(unittest.TestCase):
         s_purchaseValue = 0
         s_newMarketValue = 0
         # test purchases
-        for p in purchases:
+        for s, p in purchases.items():
             self.assertTrue(p['purchaseQuantity'] >= 0)
             self.assertAlmostEqual(p['currentMarketValue'], p['currentPrice'] * p['openQuantity'])
             self.assertAlmostEqual(p['purchaseValue'], p['currentPrice'] * p['purchaseQuantity'])
@@ -67,19 +67,19 @@ class CalculatorTest(unittest.TestCase):
         rands = [random() for _ in range(randint(1,5))]
         tot = sum(rands)
 
-        positions = []
+        positions = {}
         balances = { 'marketValue': 0 }
-        for r in rands:
+        for n, r in enumerate(rands):
             price = random() * 100.0
             quantity = randint(0, 100)
             currentMarketValue = price * quantity
             balances['marketValue'] += currentMarketValue
-            positions.append({
+            positions[str(n)] = {
                 'composition': r/tot,
                 'currentPrice': price,
                 'openQuantity': quantity,
                 'currentMarketValue': currentMarketValue
-            })
+            }
         balances['cash'] = randint(0, 2000)
         balances['totalEquity'] =  balances['cash'] + balances['marketValue']
         return positions, balances
