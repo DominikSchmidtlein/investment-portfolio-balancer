@@ -1,17 +1,8 @@
 from balancer.configmanager import ConfigManager
+from balancer.compositionmanager import CompositionManager
 from balancer.questradeclient import QuestradeClient
 from balancer.calculator import Calculator
 from balancer.printer import Printer
-
-COMPOSITION = {
-    "VE.TO": { 'composition': 0.10 },
-    "VA.TO": { 'composition': 0.10 },
-    "VEE.TO": { 'composition': 0.10 },
-    "VCN.TO": { 'composition': 0.20 },
-    "VUN.TO": { 'composition': 0.30 },
-    "BND.TO": { 'composition': 0.20 }
-}
-assert sum(v['composition'] for _, v in COMPOSITION.items()) == 1
 
 def lambda_handler(event, context):
     # retrieve config
@@ -22,12 +13,16 @@ def lambda_handler(event, context):
     # update config
     config.update(qclient.login_response)
     configmanager.put_config(config)
+    # retrieve desired composition
+    compositionmanager = CompositionManager()
+    composition = compositionmanager.get_composition(int(config['account_id']))
+    assert sum(v['composition'] for v in composition.values()) - 1 <= 0.00000001
     # get portfolio positions
     positions = qclient.get_positions(False,
         ['currentPrice', 'openQuantity', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
 
-    for symbol in set().union(positions.keys(), COMPOSITION.keys()):
-        position = { 'composition': 0, **COMPOSITION.get(symbol, {}) }
+    for symbol in set().union(positions.keys(), composition.keys()):
+        position = { 'composition': 0, **composition.get(symbol, {}) }
         if symbol in positions:
             position.update(positions[symbol])
         else:
