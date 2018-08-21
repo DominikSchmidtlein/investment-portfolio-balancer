@@ -4,11 +4,12 @@ from balancer.calculator import Calculator
 from balancer.printer import Printer
 
 COMPOSITION = {
-    "VE.TO": { 'composition': 0.23 },
-    "VA.TO": { 'composition': 0.15 },
-    "VEE.TO": { 'composition': 0.11 },
-    "VCN.TO": { 'composition': 0.04 },
-    "VUN.TO": { 'composition': 0.47 }
+    "VE.TO": { 'composition': 0.10 },
+    "VA.TO": { 'composition': 0.10 },
+    "VEE.TO": { 'composition': 0.10 },
+    "VCN.TO": { 'composition': 0.20 },
+    "VUN.TO": { 'composition': 0.30 },
+    "BND.TO": { 'composition': 0.20 }
 }
 assert sum(v['composition'] for _, v in COMPOSITION.items()) == 1
 
@@ -30,7 +31,7 @@ def lambda_handler(event, context):
         if symbol in positions:
             position.update(positions[symbol])
         else:
-            position.update({ 'openQuantity': 0, 'currentMarketValue': 0, 'averageEntryPrice': 'N/A' })
+            position.update({ 'openQuantity': 0, 'currentMarketValue': 0, 'averageEntryPrice': 0 })
             symbol_id = qclient.get_symbol(symbol, ['symbolId'])['symbolId']
             current_price = qclient.get_quote(symbol_id, ['lastTradePrice'])['lastTradePrice']
             position.update({ 'symbolId': symbol_id, 'currentPrice': current_price })
