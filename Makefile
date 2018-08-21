@@ -32,3 +32,7 @@ build:
 	$(eval VENV = $(shell pipenv --venv))
 	cd ${VENV}/lib/python3.6/site-packages && zip -r9 ${DELIVERABLE} ./*
 	zip -r9 ${DELIVERABLE} . -i '*.py'
+
+# Rin shell
+pyshell:
+	pipenv shell python3
