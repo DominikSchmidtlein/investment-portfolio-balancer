@@ -2,7 +2,7 @@ from balancer.configmanager import ConfigManager
 from balancer.compositionmanager import CompositionManager
 from balancer.questradeclient import QuestradeClient
 from balancer.calculator import Calculator
-from balancer.printer import Printer
+from balancer.tablegenerator import TableGenerator
 
 def lambda_handler(event, context):
     # retrieve config
@@ -37,10 +37,10 @@ def lambda_handler(event, context):
     calculator = Calculator()
     purchases, new_balances = calculator.balance(positions, balances)
 
-    # print portfolio
-    printer = Printer()
-    printer.print_transactions(purchases)
-    printer.print_balances(new_balances)
+    # generate tables
+    tablegenerator = TableGenerator()
+    print(tablegenerator.transactions_table(purchases))
+    print(tablegenerator.balances_table(new_balances))
 
 if __name__ == '__main__':
     lambda_handler(None, None)
