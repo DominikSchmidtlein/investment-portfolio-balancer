@@ -33,6 +33,10 @@ build:
 	cd ${VENV}/lib/python3.6/site-packages && zip -r9 ${DELIVERABLE} ./*
 	zip -r9 ${DELIVERABLE} . -i '*.py'
 
-# Rin shell
+# Run python shell
 pyshell:
 	pipenv shell python3
+
+# Run pipenv shell
+shell:
+	pipenv shell
