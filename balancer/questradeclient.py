@@ -8,24 +8,18 @@ class QuestradeClient:
 		self.account_id = account_id
 
 	def __login(self, refresh_token):
-		response = requests.get(self.LOGIN_URL + refresh_token)
-		response.raise_for_status()
-		config = response.json()
+		config = self.get(self.LOGIN_URL + refresh_token, headers={})
 		self.api_server = config["api_server"]
 		self.authorization = config['token_type'] + ' ' + config['access_token']
 		return config
 
 	def get_accounts(self):
 		url = "{s.api_server}v1/accounts".format(s=self)
-		response = requests.get(url, headers=self.__get_request_headers())
-		response.raise_for_status()
-		return response.json()
+		return self.get(url)
 
 	def get_balances(self, raw=True, currencies=None, attributes=None):
 		url = "{s.api_server}v1/accounts/{s.account_id}/balances".format(s=self)
-		response = requests.get(url, headers=self.__get_request_headers())
-		response.raise_for_status()
-		json = response.json()
+		json = self.get(url)
 		if raw:
 			return json
 		elif not currencies and not attributes:
@@ -35,9 +29,7 @@ class QuestradeClient:
 
 	def get_positions(self, raw=True, attributes=None):
 		url = "{s.api_server}v1/accounts/{s.account_id}/positions".format(s=self)
-		response = requests.get(url, headers=self.__get_request_headers())
-		response.raise_for_status()
-		json = response.json()
+		json = self.get(url)
 		if raw:
 			return json
 		elif not attributes:
@@ -65,9 +57,7 @@ class QuestradeClient:
 
 	def get_symbol(self, symbol, attributes=None):
 		url = "{s.api_server}v1/symbols".format(s=self)
-		response = requests.get(url, headers=self.__get_request_headers(), params={'names': symbol})
-		response.raise_for_status()
-		json = response.json()['symbols'][0]
+		json = self.get(url, params={'names': symbol})['symbols'][0]
 		if not attributes:
 			return json
 		else:
@@ -75,13 +65,18 @@ class QuestradeClient:
 
 	def get_quote(self, symbol_id, attributes=None):
 		url = "{s.api_server}v1/markets/quotes/{symbol_id}".format(s=self, symbol_id=symbol_id)
-		response = requests.get(url, headers=self.__get_request_headers())
-		response.raise_for_status()
-		json = response.json()['quotes'][0]
+		json = self.get(url)['quotes'][0]
 		if not attributes:
 			return json
 		else:
 			return { k: v for k, v in json.items() if k in attributes }
+
+	def get(self, url, headers=None, params=None):
+		if headers is None:
+			headers = self.__get_request_headers()
+		response = requests.get(url, headers=headers, params=params)
+		response.raise_for_status()
+		return response.json()
 
 
 	def __get_request_headers(self):
