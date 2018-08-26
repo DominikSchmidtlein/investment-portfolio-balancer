@@ -1,4 +1,4 @@
-def balance(positions, balances, min_quantity=10):
+def balance(positions, balances, composition, min_quantity=10):
     """balance(dict1, dict2) -> list, dict
 
     dict1 has nested dict with keys:
@@ -10,6 +10,7 @@ def balance(positions, balances, min_quantity=10):
     'before actual %', 'after actual %', 'ideal %'
     Return a copy of dict with keys 'newCash', 'newMarketValue'
     """
+    normalize_symbols(positions, composition)
 
     # calculate purchases
     new_balances = balances.copy()
@@ -44,6 +45,19 @@ def balance(positions, balances, min_quantity=10):
         else:
             del p_p[symbol]
     return percentages(purchases, balances['totalEquity']), new_balances
+
+def normalize_symbols(positions, composition):
+    for symbol in set().union(positions.keys(), composition.keys()):
+        position = { 'composition': 0, **composition.get(symbol, {}) }
+        if symbol in positions:
+            position.update(positions[symbol])
+        else:
+            position.update({ 'openQuantity': 0, 'currentMarketValue': 0, 'averageEntryPrice': 0 })
+            symbol_id = qclient.get_symbol(symbol, ['symbolId'])['symbolId']
+            current_price = qclient.get_quote(symbol_id, ['lastTradePrice'])['lastTradePrice']
+            position.update({ 'symbolId': symbol_id, 'currentPrice': current_price })
+        positions.update({ symbol: position })
+
 
 def percentages(positions, total_equity):
     """percentages(dict) -> dict

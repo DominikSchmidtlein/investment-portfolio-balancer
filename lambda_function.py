@@ -21,20 +21,9 @@ def lambda_handler(event, context):
     positions = qclient.get_positions(False,
         ['currentPrice', 'openQuantity', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
 
-    for symbol in set().union(positions.keys(), comp.keys()):
-        position = { 'composition': 0, **comp.get(symbol, {}) }
-        if symbol in positions:
-            position.update(positions[symbol])
-        else:
-            position.update({ 'openQuantity': 0, 'currentMarketValue': 0, 'averageEntryPrice': 0 })
-            symbol_id = qclient.get_symbol(symbol, ['symbolId'])['symbolId']
-            current_price = qclient.get_quote(symbol_id, ['lastTradePrice'])['lastTradePrice']
-            position.update({ 'symbolId': symbol_id, 'currentPrice': current_price })
-        positions.update({ symbol: position })
-
     # get portfolio balances
     balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]
-    purchases, new_balances = calculator.balance(positions, balances)
+    purchases, new_balances = calculator.balance(positions, balances, comp)
 
     # generate tables
     tablegenerator = TableGenerator()
