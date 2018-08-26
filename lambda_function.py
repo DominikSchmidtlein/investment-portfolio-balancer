@@ -1,6 +1,6 @@
 from balancer.configmanager import ConfigManager
 from balancer import composition
-from balancer.questradeclient import QuestradeClient
+from balancer import questradeclient
 from balancer import calculator
 from balancer.tablegenerator import TableGenerator
 from balancer import email
@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     configmanager = ConfigManager()
     config = configmanager.get_config()
     # connect to questrade
-    qclient = QuestradeClient(config['refresh_token'], config['account_id'])
+    qclient = questradeclient.Client(config['refresh_token'], config['account_id'])
     # update config
     config.update(qclient.login_response)
     configmanager.put_config(config)
@@ -18,10 +18,10 @@ def lambda_handler(event, context):
     comp = composition.retrieve(int(config['account_id']))
     assert sum(v['composition'] for v in comp.values()) - 1 <= 0.00000001
     # get portfolio positions
-    positions = qclient.get_positions(False,
+    positions = qclient.get_positions(
         ['currentPrice', 'openQuantity', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
     # get portfolio balances
-    balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]
+    balances = qclient.get_balances(attributes=['currency', 'cash', 'marketValue', 'totalEquity'])
     # calculate balanced portfolio
     purchases, new_balances = calculator.balance(positions, balances, comp)
     # generate tables
