@@ -1,7 +1,7 @@
 from balancer.configmanager import ConfigManager
 from balancer import composition
 from balancer.questradeclient import QuestradeClient
-from balancer.calculator import Calculator
+from balancer import calculator
 from balancer.tablegenerator import TableGenerator
 from balancer import email
 
@@ -34,7 +34,6 @@ def lambda_handler(event, context):
 
     # get portfolio balances
     balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]
-    calculator = Calculator()
     purchases, new_balances = calculator.balance(positions, balances)
 
     # generate tables
