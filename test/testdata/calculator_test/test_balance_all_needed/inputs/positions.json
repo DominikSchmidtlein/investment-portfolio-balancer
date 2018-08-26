@@ -1,18 +1,15 @@
 {
   "symbolA": {
-    "composition": 0.3,
     "currentPrice": 2,
     "currentMarketValue": 150,
     "openQuantity": 75
   },
   "symbolB": {
-    "composition": 0.3,
     "currentPrice": 1,
     "currentMarketValue": 250,
     "openQuantity": 250
   },
   "symbolC": {
-    "composition": 0.4,
     "currentPrice": 5,
     "currentMarketValue": 250,
     "openQuantity": 50
