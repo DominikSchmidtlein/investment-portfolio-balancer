@@ -1,0 +1,58 @@
+{
+  "symbolA": {
+    "composition": 0.2,
+    "currentPrice": 1,
+    "currentMarketValue": 0,
+    "openQuantity": 0,
+    "purchaseValue": 160,
+    "purchaseQuantity": 160,
+    "newMarketValue": 160,
+    "newQuantity": 160,
+    "before actual %": 0,
+    "after actual %": 16,
+    "ideal %": 20,
+    "allocation": 200
+  },
+  "symbolB": {
+    "composition": 0.3,
+    "currentPrice": 2,
+    "currentMarketValue": 200,
+    "openQuantity": 100,
+    "purchaseValue": 80,
+    "purchaseQuantity": 40,
+    "newMarketValue": 280,
+    "newQuantity": 140,
+    "before actual %": 20,
+    "after actual %": 28,
+    "ideal %": 30,
+    "allocation": 300
+  },
+  "symbolC": {
+    "composition": 0.5,
+    "currentPrice": 0.5,
+    "currentMarketValue": 50,
+    "openQuantity": 100,
+    "purchaseValue": 410,
+    "purchaseQuantity": 820,
+    "newMarketValue": 460,
+    "newQuantity": 920,
+    "before actual %": 5,
+    "after actual %": 46,
+    "ideal %": 50,
+    "allocation": 500
+  },
+  "symbolD": {
+    "composition": 0.0,
+    "currentPrice": 1,
+    "currentMarketValue": 100,
+    "openQuantity": 100,
+    "purchaseValue": 0,
+    "purchaseQuantity": 0,
+    "newMarketValue": 100,
+    "newQuantity": 100,
+    "before actual %": 10,
+    "after actual %": 10,
+    "ideal %": 0,
+    "allocation": 0
+  }
+}

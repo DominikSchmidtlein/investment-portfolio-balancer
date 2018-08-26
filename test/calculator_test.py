@@ -13,23 +13,38 @@ class CalculatorTest(unittest.TestCase):
 
         positions_c = deepcopy(positions)
         balances_c = balances.copy()
+        prices = {}
 
-        purchases, new_balances = calculator.balance(positions_c, balances_c, composition)
+        def get_price(symbol):
+            price = random() * 100.0
+            prices[symbol] = price
+            return price
+
+        purchases, new_balances = calculator.balance(positions_c, balances_c, composition, get_price)
 
         # test inputs haven't been modified
         self.assertEqual(positions, positions_c)
         self.assertEqual(balances, balances_c)
         # test common values are consistent between input and output
         self.assertEqual(balances, { k: v for k, v in new_balances.items() if k in balances.keys() })
-        self.assertEqual(positions, {s: {k: v for k, v in p.items() if k in next(iter(positions.values()))} for s, p in purchases.items()})
+        for symbol, position in positions.items():
+            self.assertEqual(position, { k: v for k, v in purchases[symbol].items() if k in position })
+        for symbol, price in prices.items():
+            self.assertEqual(price, purchases[symbol]['currentPrice'])
 
-        self.assertAlmostEqual(1, sum((p['composition'] for _, p in purchases.items())))
+        self.assertAlmostEqual(1, sum((p['composition'] for p in purchases.values())))
+
+        # test symbol no overlap in positions and prices symbols
+        self.assertFalse(set(positions).intersection(set(prices)))
+        # test purchases symbol sum of positions and prices
+        self.assertEqual(set(purchases), set(positions).union(set(prices)))
 
         # test new_balances
         self.assertEqual(new_balances['totalEquity'], new_balances['marketValue'] + new_balances['cash'])
         self.assertAlmostEqual(new_balances['totalEquity'], new_balances['newMarketValue'] + new_balances['newCash'])
         self.assertTrue(new_balances['newMarketValue'] >= new_balances['marketValue'])
 
+        # test on outputs only
         s_currentMarketValue = 0
         s_purchaseValue = 0
         s_newMarketValue = 0
@@ -60,14 +75,10 @@ class CalculatorTest(unittest.TestCase):
         self.assertTrue(new_balances['cash'] >= s_purchaseValue)
 
     def _generate_random_inputs(self):
-        # get random number of random numbers
-        rands = [random() for _ in range(randint(1,5))]
-        tot = sum(rands)
-
+        # setup positions
         positions = {}
-        composition = {}
         balances = { 'marketValue': 0 }
-        for n, r in enumerate(rands):
+        for n in range(randint(1,5)):
             price = random() * 100.0
             quantity = randint(0, 100)
             currentMarketValue = price * quantity
@@ -77,11 +88,18 @@ class CalculatorTest(unittest.TestCase):
                 'openQuantity': quantity,
                 'currentMarketValue': currentMarketValue
             }
+        balances['cash'] = randint(0, 2000)
+        balances['totalEquity'] =  balances['cash'] + balances['marketValue']
+
+        # get random number of random numbers
+        rands = [random() for _ in range(randint(1,5))]
+        tot = sum(rands)
+        # setup composition
+        composition = {}
+        for n, r in enumerate(rands):
             composition[str(n)] = {
                 'composition': r/tot
             }
-        balances['cash'] = randint(0, 2000)
-        balances['totalEquity'] =  balances['cash'] + balances['marketValue']
         return positions, balances, composition
 
     def test_balance(self):
@@ -93,6 +111,9 @@ class CalculatorTest(unittest.TestCase):
     def test_balance_not_all_needed(self):
         self._test_balance(directory_path='test_balance_not_all_needed/')
 
+    def test_balance_different_symbols(self):
+        self._test_balance(directory_path='test_balance_different_symbols/')
+
     def _test_balance(self,
                       directory_path,
                       inputs_directory='inputs/',
@@ -100,6 +121,7 @@ class CalculatorTest(unittest.TestCase):
                       positions_filename='positions.json',
                       balances_filename='balances.json',
                       composition_filename='composition.json',
+                      prices_filename='prices.json',
                       purchases_filename='purchases.json',
                       new_balances_filename='new_balances.json'):
 
@@ -110,7 +132,10 @@ class CalculatorTest(unittest.TestCase):
         balances = self._data(input_dir_path, balances_filename)
         composition = self._data(input_dir_path, composition_filename)
 
-        purchases, new_balances = calculator.balance(positions, balances, composition)
+        def get_price(symbol):
+            return self._data(input_dir_path, prices_filename)[symbol]
+
+        purchases, new_balances = calculator.balance(positions, balances, composition, get_price)
 
         # expected purchases
         x_purchases = self._data(output_dir_path, purchases_filename)

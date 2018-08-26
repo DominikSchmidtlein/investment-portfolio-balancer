@@ -23,7 +23,6 @@ class Client:
         self.authorization = config['token_type'] + ' ' + config['access_token']
         return config
 
-    @select_attributes
     def get_accounts(self):
         url = "{s.api_server}v1/accounts".format(s=self)
         return self.get(url)

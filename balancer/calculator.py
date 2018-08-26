@@ -1,6 +1,6 @@
 import copy
 
-def balance(positions, balances, composition, min_quantity=10):
+def balance(positions, balances, composition, get_price=None, min_quantity=10):
     """balance(dict1, dict2) -> list, dict
 
     dict1 has nested dict with keys:
@@ -16,7 +16,7 @@ def balance(positions, balances, composition, min_quantity=10):
     balances = copy.deepcopy(balances)
     composition = copy.deepcopy(composition)
 
-    normalize_symbols(positions, composition)
+    normalize_symbols(positions, composition, get_price)
 
     # calculate purchases
     balances['newCash'] = balances['cash']
@@ -50,16 +50,14 @@ def balance(positions, balances, composition, min_quantity=10):
 
     return positions, balances
 
-def normalize_symbols(positions, composition):
+def normalize_symbols(positions, composition, get_price):
     for symbol in set().union(positions.keys(), composition.keys()):
         position = { 'composition': 0, **composition.get(symbol, {}) }
         if symbol in positions:
             position.update(positions[symbol])
         else:
-            position.update({ 'openQuantity': 0, 'currentMarketValue': 0, 'averageEntryPrice': 0 })
-            symbol_id = qclient.get_symbol(symbol, ['symbolId'])['symbolId']
-            current_price = qclient.get_quote(symbol_id, ['lastTradePrice'])['lastTradePrice']
-            position.update({ 'symbolId': symbol_id, 'currentPrice': current_price })
+            position.update({ 'openQuantity': 0, 'currentMarketValue': 0 })
+            position['currentPrice'] = get_price(symbol)
         positions.update({ symbol: position })
 
 

@@ -1,0 +1,17 @@
+{
+  "symbolB": {
+    "currentPrice": 2,
+    "currentMarketValue": 200,
+    "openQuantity": 100
+  },
+  "symbolC": {
+    "currentPrice": 0.5,
+    "currentMarketValue": 50,
+    "openQuantity": 100
+  },
+  "symbolD": {
+    "currentPrice": 1,
+    "currentMarketValue": 100,
+    "openQuantity": 100
+  }
+}
