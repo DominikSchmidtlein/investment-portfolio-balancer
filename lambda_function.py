@@ -1,6 +1,6 @@
 from balancer.configmanager import ConfigManager
 from balancer import composition
-from balancer import questradeclient
+from balancer import questrade
 from balancer import calculator
 from balancer.tablegenerator import TableGenerator
 from balancer import email
@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     configmanager = ConfigManager()
     config = configmanager.get_config()
     # connect to questrade
-    qclient = questradeclient.Client(config['refresh_token'], config['account_id'])
+    qclient = questrade.Client(config['refresh_token'], config['account_id'])
     # update config
     config.update(qclient.login_response)
     configmanager.put_config(config)
