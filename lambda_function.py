@@ -3,7 +3,7 @@ from balancer.compositionmanager import CompositionManager
 from balancer.questradeclient import QuestradeClient
 from balancer.calculator import Calculator
 from balancer.tablegenerator import TableGenerator
-from balancer.emailmanager import EmailManager
+from balancer import email
 
 def lambda_handler(event, context):
     # retrieve config
@@ -44,8 +44,7 @@ def lambda_handler(event, context):
     b_table = tablegenerator.balances_table(new_balances)
 
     # email tables
-    emailmanager = EmailManager()
-    emailmanager.send_email("Questrade Portfolio Overview", str(p_table) + "\n\n" + str(b_table))
+    email.send_email("Questrade Portfolio Overview", str(p_table) + "\n\n" + str(b_table))
 
     # print tables
     print(p_table)
