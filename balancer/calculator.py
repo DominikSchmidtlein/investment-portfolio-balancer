@@ -1,3 +1,5 @@
+import copy
+
 def balance(positions, balances, composition, min_quantity=10):
     """balance(dict1, dict2) -> list, dict
 
@@ -10,41 +12,43 @@ def balance(positions, balances, composition, min_quantity=10):
     'before actual %', 'after actual %', 'ideal %'
     Return a copy of dict with keys 'newCash', 'newMarketValue'
     """
+    positions = copy.deepcopy(positions)
+    balances = copy.deepcopy(balances)
+    composition = copy.deepcopy(composition)
+
     normalize_symbols(positions, composition)
 
     # calculate purchases
-    new_balances = balances.copy()
-    new_balances['newCash'] = balances['cash']
-    new_balances['newMarketValue'] = balances['marketValue']
+    balances['newCash'] = balances['cash']
+    balances['newMarketValue'] = balances['marketValue']
 
-    purchases = {}
     for s, p in positions.items():
-        n_p = p.copy()
-        n_p['purchaseValue'] = 0
-        n_p['purchaseQuantity'] = 0
-        n_p['newMarketValue'] = p['currentMarketValue']
-        n_p['newQuantity'] = p['openQuantity']
-        n_p['allocation'] = balances['totalEquity'] * p['composition']
-        purchases[s] = n_p
+        p['purchaseValue'] = 0
+        p['purchaseQuantity'] = 0
+        p['newMarketValue'] = p['currentMarketValue']
+        p['newQuantity'] = p['openQuantity']
+        p['allocation'] = balances['totalEquity'] * p['composition']
 
     # purchasable positions
-    p_p = purchases.copy()
+    p_p = positions.copy()
     while p_p:
         # retrieve the position that is furthest from the desired allocation
         symbol = max(p_p, key=lambda x: p_p[x]['allocation'] - p_p[x]['newMarketValue'])
         p = p_p[symbol]
         cost = p['currentPrice'] * min_quantity
         needed = p['allocation'] >= p['newMarketValue'] + cost
-        if needed and cost <= new_balances['newCash']:
+        if needed and cost <= balances['newCash']:
             p['purchaseQuantity'] += min_quantity
             p['purchaseValue'] += cost
             p['newQuantity'] += min_quantity
             p['newMarketValue'] += cost
-            new_balances['newCash'] -= cost
-            new_balances['newMarketValue'] += cost
+            balances['newCash'] -= cost
+            balances['newMarketValue'] += cost
         else:
             del p_p[symbol]
-    return percentages(purchases, balances['totalEquity']), new_balances
+    percentages(positions, balances['totalEquity'])
+
+    return positions, balances
 
 def normalize_symbols(positions, composition):
     for symbol in set().union(positions.keys(), composition.keys()):
@@ -68,11 +72,7 @@ def percentages(positions, total_equity):
     'before actual %', 'after actual %', 'ideal %'
     """
 
-    w_percent = {}
     for s, p in positions.items():
-        w_p = p.copy()
-        w_p['before actual %'] = 100.0 * p['currentMarketValue'] / total_equity
-        w_p['after actual %'] = 100.0 * p['newMarketValue'] / total_equity
-        w_p['ideal %'] = p['composition'] * 100
-        w_percent[s] = w_p
-    return w_percent
+        p['before actual %'] = 100.0 * p['currentMarketValue'] / total_equity
+        p['after actual %'] = 100.0 * p['newMarketValue'] / total_equity
+        p['ideal %'] = p['composition'] * 100

@@ -20,11 +20,10 @@ def lambda_handler(event, context):
     # get portfolio positions
     positions = qclient.get_positions(False,
         ['currentPrice', 'openQuantity', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
-
     # get portfolio balances
     balances = qclient.get_balances(False, ['CAD'], ['currency', 'cash', 'marketValue', 'totalEquity'])[0]
+    # calculate balanced portfolio
     purchases, new_balances = calculator.balance(positions, balances, comp)
-
     # generate tables
     tablegenerator = TableGenerator()
     p_table = tablegenerator.transactions_table(purchases)

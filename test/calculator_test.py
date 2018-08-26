@@ -2,22 +2,19 @@ import unittest
 from random import random, randint
 from copy import deepcopy
 import json
-from balancer.calculator import Calculator
+from balancer import calculator
 
 class CalculatorTest(unittest.TestCase):
     DATA_PATH = 'test/testdata/calculator_test/'
 
-    def setUp(self):
-        self.calculator = Calculator()
-
     # python3.6 -m unittest test.calculator_test.CalculatorTest.test_balance_random_inputs
     def test_balance_random_inputs(self):
-        positions, balances = self._generate_random_inputs()
+        positions, balances, composition = self._generate_random_inputs()
 
         positions_c = deepcopy(positions)
         balances_c = balances.copy()
 
-        purchases, new_balances = self.calculator.balance(positions_c, balances_c)
+        purchases, new_balances = calculator.balance(positions_c, balances_c, composition)
 
         # test inputs haven't been modified
         self.assertEqual(positions, positions_c)
@@ -68,6 +65,7 @@ class CalculatorTest(unittest.TestCase):
         tot = sum(rands)
 
         positions = {}
+        composition = {}
         balances = { 'marketValue': 0 }
         for n, r in enumerate(rands):
             price = random() * 100.0
@@ -75,14 +73,16 @@ class CalculatorTest(unittest.TestCase):
             currentMarketValue = price * quantity
             balances['marketValue'] += currentMarketValue
             positions[str(n)] = {
-                'composition': r/tot,
                 'currentPrice': price,
                 'openQuantity': quantity,
                 'currentMarketValue': currentMarketValue
             }
+            composition[str(n)] = {
+                'composition': r/tot
+            }
         balances['cash'] = randint(0, 2000)
         balances['totalEquity'] =  balances['cash'] + balances['marketValue']
-        return positions, balances
+        return positions, balances, composition
 
     def test_balance(self):
         self._test_balance(directory_path='test_balance/')
@@ -99,6 +99,7 @@ class CalculatorTest(unittest.TestCase):
                       outputs_directory='outputs/',
                       positions_filename='positions.json',
                       balances_filename='balances.json',
+                      composition_filename='composition.json',
                       purchases_filename='purchases.json',
                       new_balances_filename='new_balances.json'):
 
@@ -107,8 +108,9 @@ class CalculatorTest(unittest.TestCase):
 
         positions = self._data(input_dir_path, positions_filename)
         balances = self._data(input_dir_path, balances_filename)
+        composition = self._data(input_dir_path, composition_filename)
 
-        purchases, new_balances = self.calculator.balance(positions, balances)
+        purchases, new_balances = calculator.balance(positions, balances, composition)
 
         # expected purchases
         x_purchases = self._data(output_dir_path, purchases_filename)
