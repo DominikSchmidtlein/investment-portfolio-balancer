@@ -5,7 +5,9 @@ def select_attributes(func):
     @functools.wraps(func)
     def wrap_select_attributes(*args, **kwargs):
         result = func(*args, **kwargs)
-        return { k: v for k, v in result.items() if k in kwargs['attributes'] }
+        if 'attributes' in kwargs:
+            return { k: v for k, v in result.items() if k in kwargs['attributes'] }
+        return result
     return wrap_select_attributes
 
 class Client:
@@ -21,6 +23,7 @@ class Client:
         self.authorization = config['token_type'] + ' ' + config['access_token']
         return config
 
+    @select_attributes
     def get_accounts(self):
         url = "{s.api_server}v1/accounts".format(s=self)
         return self.get(url)
