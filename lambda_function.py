@@ -1,5 +1,5 @@
 from balancer.configmanager import ConfigManager
-from balancer.compositionmanager import CompositionManager
+from balancer import composition
 from balancer.questradeclient import QuestradeClient
 from balancer.calculator import Calculator
 from balancer.tablegenerator import TableGenerator
@@ -15,15 +15,14 @@ def lambda_handler(event, context):
     config.update(qclient.login_response)
     configmanager.put_config(config)
     # retrieve desired composition
-    compositionmanager = CompositionManager()
-    composition = compositionmanager.get_composition(int(config['account_id']))
-    assert sum(v['composition'] for v in composition.values()) - 1 <= 0.00000001
+    comp = composition.retrieve(int(config['account_id']))
+    assert sum(v['composition'] for v in comp.values()) - 1 <= 0.00000001
     # get portfolio positions
     positions = qclient.get_positions(False,
         ['currentPrice', 'openQuantity', 'symbolId', 'currentMarketValue', 'averageEntryPrice'])
 
-    for symbol in set().union(positions.keys(), composition.keys()):
-        position = { 'composition': 0, **composition.get(symbol, {}) }
+    for symbol in set().union(positions.keys(), comp.keys()):
+        position = { 'composition': 0, **comp.get(symbol, {}) }
         if symbol in positions:
             position.update(positions[symbol])
         else:
