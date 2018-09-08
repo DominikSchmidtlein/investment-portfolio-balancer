@@ -1,15 +1,6 @@
 import requests
 import functools
 
-def select_attributes(func):
-    @functools.wraps(func)
-    def wrap_select_attributes(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if 'attributes' in kwargs:
-            return { k: v for k, v in result.items() if k in kwargs['attributes'] }
-        return result
-    return wrap_select_attributes
-
 class Client:
     LOGIN_URL = "https://login.questrade.com/oauth2/token?grant_type=refresh_token&refresh_token="
 
@@ -27,11 +18,9 @@ class Client:
         url = "{s.api_server}v1/accounts".format(s=self)
         return self.get(url)
 
-    @select_attributes
-    def get_balances(self, **kwargs):
+    def get_balances(self):
         url = "{s.api_server}v1/accounts/{s.account_id}/balances".format(s=self)
-        json = self.get(url)
-        return next((cur for cur in json["perCurrencyBalances"] if cur["currency"] == "CAD"))
+        return self.get(url)
 
     def get_positions(self, attributes=None):
         url = "{s.api_server}v1/accounts/{s.account_id}/positions".format(s=self)
