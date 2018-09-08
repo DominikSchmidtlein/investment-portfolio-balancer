@@ -12,6 +12,7 @@ def lambda_handler(event, context):
     config = configmanager.get_config()
     # connect to questrade
     qclient = questrade.Client(config['refresh_token'], config['account_id'])
+    wrapper = questradewrapper.ClientWrapper(qclient)
     # update config
     config.update(qclient.login_response)
     configmanager.put_config(config)
@@ -19,10 +20,8 @@ def lambda_handler(event, context):
     comp = composition.retrieve(int(config['account_id']))
     assert sum(v['composition'] for v in comp.values()) - 1 <= 0.00000001
     # get portfolio positions
-    positions = qclient.get_positions(
-        ['currentPrice', 'openQuantity', 'currentMarketValue', 'averageEntryPrice'])
+    positions = wrapper.positions()
     # get portfolio balances
-    wrapper = questradewrapper.ClientWrapper(qclient)
     balances = wrapper.balances()
     # calculate balanced portfolio
     purchases, new_balances = calculator.balance(positions, balances, comp, price_getter(qclient))

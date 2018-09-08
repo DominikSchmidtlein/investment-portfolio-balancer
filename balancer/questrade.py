@@ -24,10 +24,7 @@ class Client:
 
     def get_positions(self, attributes=None):
         url = "{s.api_server}v1/accounts/{s.account_id}/positions".format(s=self)
-        json = self.get(url)
-        if not attributes:
-            return json['positions']
-        return { p['symbol']: { k: v for k, v in p.items() if k in attributes } for p in json['positions'] }
+        return self.get(url)
 
     def market_purchase(self, symbolId, quantity):
         if quantity <= 0:
