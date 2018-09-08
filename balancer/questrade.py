@@ -26,25 +26,6 @@ class Client:
         url = "{s.api_server}v1/accounts/{s.account_id}/positions".format(s=self)
         return self.get(url)
 
-    def market_purchase(self, symbolId, quantity):
-        if quantity <= 0:
-            return
-        data = {
-            "symbolId": symbolId,
-            "quantity": quantity,
-            "timeInForce": "Day",
-            "icebergQuantity": 10,
-            "isAllOrNone": False,
-            "orderType": "Market",
-            "action": "Buy",
-            "primaryRoute": "AUTO",
-            "secondaryRoute": "AUTO",
-        }
-        url = "{s.api_server}v1/accounts/{s.account_id}/orders".format(s=self)
-        response = requests.post(url, headers=self.__post_request_headers(), json=data)
-        response.raise_for_status()
-        return response.json()
-
     def get_symbol(self, symbol, attributes=None):
         url = "{s.api_server}v1/symbols".format(s=self)
         json = self.get(url, params={'names': symbol})['symbols'][0]
