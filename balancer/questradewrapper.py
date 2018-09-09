@@ -1,3 +1,6 @@
+from balancer import questrade
+import balancer.configmanager as configuration
+
 BALANCES_ATTRIBUTES = ['currency', 'cash', 'marketValue', 'totalEquity']
 POSITIONS_ATTRIBUTES = ['currentPrice', 'openQuantity', 'currentMarketValue', 'averageEntryPrice']
 
@@ -14,7 +17,15 @@ def positions_from_json(json, attributes=POSITIONS_ATTRIBUTES):
     return positions
 
 class ClientWrapper:
-    def __init__(self, client):
+    def __init__(self, configmanager=None, client=None):
+        if configmanager is None:
+            configmanager = configuration.ConfigManager()
+        config = configmanager.config()
+        self.account_id = int(config['account_id'])
+        if client is None:
+            client = questrade.Client(config['refresh_token'], self.account_id)
+        config.update(client.login_response)
+        configmanager.put_config(config)
         self.client = client
 
     def balances(self):

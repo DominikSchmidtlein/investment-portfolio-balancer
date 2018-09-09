@@ -1,5 +1,4 @@
 import requests
-import functools
 
 class Client:
     LOGIN_URL = "https://login.questrade.com/oauth2/token?grant_type=refresh_token&refresh_token="
