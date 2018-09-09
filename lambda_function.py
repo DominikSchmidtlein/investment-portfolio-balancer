@@ -25,7 +25,7 @@ def lambda_handler(event, context):
     b_table = tablegenerator.balances_table(new_balances)
 
     # email tables
-    email.send_email("Questrade Portfolio Overview", str(p_table) + "\n\n" + str(b_table))
+    email.send_email("Questrade Portfolio Overview 0.1", str(p_table) + "\n\n" + str(b_table))
 
     # print tables
     print(p_table)
