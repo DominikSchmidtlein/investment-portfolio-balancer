@@ -18,7 +18,6 @@ def lambda_handler(event, context):
     configmanager.put_config(config)
     # retrieve desired composition
     comp = composition.retrieve(int(config['account_id']))
-    assert sum(v['composition'] for v in comp.values()) - 1 <= 0.00000001
     # get portfolio positions
     positions = wrapper.positions()
     # get portfolio balances
