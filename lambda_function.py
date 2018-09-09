@@ -12,7 +12,7 @@ def lambda_handler(event, context):
     # connect to questrade
     wrapper = questradewrapper.ClientWrapper(account_id)
     # retrieve desired composition
-    comp = composition.retrieve(int(account_id))
+    comp = composition.retrieve(account_id)
     # get portfolio positions
     positions = wrapper.positions()
     # get portfolio balances
