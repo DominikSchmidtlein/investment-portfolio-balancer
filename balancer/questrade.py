@@ -22,25 +22,17 @@ class Client:
         url = "{s.api_server}v1/accounts/{s.account_id}/balances".format(s=self)
         return self.get(url)
 
-    def get_positions(self, attributes=None):
+    def get_positions(self):
         url = "{s.api_server}v1/accounts/{s.account_id}/positions".format(s=self)
         return self.get(url)
 
-    def get_symbol(self, symbol, attributes=None):
+    def get_symbol(self, symbol):
         url = "{s.api_server}v1/symbols".format(s=self)
-        json = self.get(url, params={'names': symbol})['symbols'][0]
-        if not attributes:
-            return json
-        else:
-            return { k: v for k, v in json.items() if k in attributes }
+        return self.get(url, params={'names': symbol})
 
-    def get_quote(self, symbol_id, attributes=None):
+    def get_quote(self, symbol_id):
         url = "{s.api_server}v1/markets/quotes/{symbol_id}".format(s=self, symbol_id=symbol_id)
-        json = self.get(url)['quotes'][0]
-        if not attributes:
-            return json
-        else:
-            return { k: v for k, v in json.items() if k in attributes }
+        return self.get(url)
 
     def get(self, url, headers=None, params=None):
         if headers is None:

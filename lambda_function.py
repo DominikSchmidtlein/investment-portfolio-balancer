@@ -24,7 +24,7 @@ def lambda_handler(event, context):
     # get portfolio balances
     balances = wrapper.balances()
     # calculate balanced portfolio
-    purchases, new_balances = calculator.balance(positions, balances, comp, price_getter(qclient))
+    purchases, new_balances = calculator.balance(positions, balances, comp, price_getter(wrapper))
     # generate tables
     tablegenerator = TableGenerator()
     p_table = tablegenerator.transactions_table(purchases)
@@ -37,10 +37,9 @@ def lambda_handler(event, context):
     print(p_table)
     print(b_table)
 
-def price_getter(qclient):
+def price_getter(client):
     def get_price(symbol):
-        symbol_id = qclient.get_symbol(symbol, ['symbolId'])['symbolId']
-        current_price = qclient.get_quote(symbol_id, ['lastTradePrice'])['lastTradePrice']
+        current_price = client.last_trade_price(symbol)
     return get_price
 
 if __name__ == '__main__':

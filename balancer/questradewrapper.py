@@ -23,8 +23,6 @@ class ClientWrapper:
     def positions(self):
         return positions_from_json(self.client.get_positions())
 
-    def symbol(self, symbol_request):
-        return symbol_from_json(self.client.get_symbol(symbol_request))
-
-    def quote(self, quote_request):
-        return quote_from_json(self.client.get_quote(quote_request))
+    def last_trade_price(self, symbol):
+        symbol_id = self.client.get_symbol(symbol)['symbols'][0]['symbolId']
+        return self.client.get_quote(symbol_id)['quotes'][0]['lastTradePrice']
