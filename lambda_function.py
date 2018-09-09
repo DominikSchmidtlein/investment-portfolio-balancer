@@ -1,3 +1,5 @@
+import settings
+import os
 from balancer import composition
 from balancer import questradewrapper
 from balancer import calculator
@@ -5,10 +7,12 @@ from balancer.tablegenerator import TableGenerator
 from balancer import email
 
 def lambda_handler(event, context):
+    account_id = os.getenv("ACCOUNT_ID")
+    print(account_id)
     # connect to questrade
-    wrapper = questradewrapper.ClientWrapper()
+    wrapper = questradewrapper.ClientWrapper(account_id)
     # retrieve desired composition
-    comp = composition.retrieve(wrapper.account_id)
+    comp = composition.retrieve(int(account_id))
     # get portfolio positions
     positions = wrapper.positions()
     # get portfolio balances

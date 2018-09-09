@@ -17,13 +17,12 @@ def positions_from_json(json, attributes=POSITIONS_ATTRIBUTES):
     return positions
 
 class ClientWrapper:
-    def __init__(self, configmanager=None, client=None):
+    def __init__(self, account_id, configmanager=None, client=None):
         if configmanager is None:
             configmanager = configuration.ConfigManager()
         config = configmanager.config()
-        self.account_id = int(config['account_id'])
         if client is None:
-            client = questrade.Client(config['refresh_token'], self.account_id)
+            client = questrade.Client(config['refresh_token'], account_id)
         config.update(client.login_response)
         configmanager.put_config(config)
         self.client = client
