@@ -1,4 +1,6 @@
 import requests
+import json
+import decimal
 
 class Client:
     LOGIN_URL = "https://login.questrade.com/oauth2/token?grant_type=refresh_token&refresh_token="
@@ -17,24 +19,26 @@ class Client:
         return config
 
     def get_accounts(self):
-        return self.get("accounts")
+        return self.get_json("accounts")
 
     def get_balances(self):
-        return self.get(f"accounts/{self.account_id}/balances")
+        return self.get_json(f"accounts/{self.account_id}/balances")
 
     def get_positions(self):
-        return self.get(f"accounts/{self.account_id}/positions")
+        return self.get_json(f"accounts/{self.account_id}/positions")
 
     def get_symbol(self, symbol):
-        return self.get("symbols", params={'names': symbol})
+        return self.get_json("symbols", params={'names': symbol})
 
     def get_quote(self, symbol_id):
-        return self.get(f"markets/quotes/{symbol_id}")
+        return self.get_json(f"markets/quotes/{symbol_id}")
+
+    def get_json(self, path, params=None):
+        response = self.get(path, params)
+        return json.loads(response.text, parse_int=decimal.Decimal,
+                                         parse_float=decimal.Decimal)
 
     def get(self, path, params=None):
-        return self.get_raw(path, params).json()
-
-    def get_raw(self, path, params=None):
         response = requests.get(self.api_server + path,
                                 headers=self.header, params=params)
         response.raise_for_status()

@@ -3,6 +3,7 @@ from random import random, randint
 from copy import deepcopy
 import json
 from balancer import calculator
+from decimal import Decimal
 
 class CalculatorTest(unittest.TestCase):
     DATA_PATH = 'test/testdata/calculator_test/'
@@ -16,7 +17,7 @@ class CalculatorTest(unittest.TestCase):
         prices = {}
 
         def get_price(symbol):
-            price = random() * 100.0
+            price = Decimal(random()) * 100
             prices[symbol] = price
             return price
 
@@ -45,9 +46,9 @@ class CalculatorTest(unittest.TestCase):
         self.assertTrue(new_balances['newMarketValue'] >= new_balances['marketValue'])
 
         # test on outputs only
-        s_currentMarketValue = 0
-        s_purchaseValue = 0
-        s_newMarketValue = 0
+        s_currentMarketValue = Decimal(0)
+        s_purchaseValue = Decimal(0)
+        s_newMarketValue = Decimal(0)
         # test purchases
         for s, p in purchases.items():
             self.assertTrue(p['purchaseQuantity'] >= 0)
@@ -77,10 +78,10 @@ class CalculatorTest(unittest.TestCase):
     def _generate_random_inputs(self):
         # setup positions
         positions = {}
-        balances = { 'marketValue': 0 }
+        balances = { 'marketValue': Decimal(0) }
         for n in range(randint(1,5)):
-            price = random() * 100.0
-            quantity = randint(0, 100)
+            price = Decimal(random()) * 100
+            quantity = Decimal(randint(0, 100))
             currentMarketValue = price * quantity
             balances['marketValue'] += currentMarketValue
             positions[str(n)] = {
@@ -88,11 +89,11 @@ class CalculatorTest(unittest.TestCase):
                 'openQuantity': quantity,
                 'currentMarketValue': currentMarketValue
             }
-        balances['cash'] = randint(0, 2000)
+        balances['cash'] = Decimal(randint(0, 2000))
         balances['totalEquity'] =  balances['cash'] + balances['marketValue']
 
         # get random number of random numbers
-        rands = [random() for _ in range(randint(1,5))]
+        rands = [Decimal(random()) for _ in range(randint(1,5))]
         tot = sum(rands)
         # setup composition
         composition = {}
@@ -147,7 +148,8 @@ class CalculatorTest(unittest.TestCase):
 
     def _data(self, directory, filename):
         with open(self.DATA_PATH + directory + filename) as f:
-            return json.load(f)
+            return json.load(f, parse_int=Decimal,
+                                parse_float=Decimal)
 
 if __name__ == '__main__':
     unittest.main()
