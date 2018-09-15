@@ -34,11 +34,14 @@ class Client:
         return self.get(url)
 
     def get(self, url, headers=None, params=None):
+        return self.get_raw(url, headers, params).json()
+
+    def get_raw(self, url, headers=None, params=None):
         if headers is None:
             headers = { "authorization": self.authorization }
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
-        return response.json()
+        return response
 
     def __post_request_headers(self):
         return {

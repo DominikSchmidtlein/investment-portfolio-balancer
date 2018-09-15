@@ -1,7 +1,6 @@
 import boto3
 import functools
 
-
 def retrieve(account_id):
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('InvestmentPortfolioBalancerComposition')
