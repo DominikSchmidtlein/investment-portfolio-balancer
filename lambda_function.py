@@ -5,6 +5,7 @@ from balancer import questradewrapper
 from balancer import calculator
 from balancer.tablegenerator import TableGenerator
 from balancer import email
+from balancer import portfoliodb
 
 def lambda_handler(event, context):
     account_id = os.getenv("ACCOUNT_ID")
@@ -18,10 +19,12 @@ def lambda_handler(event, context):
     # get portfolio balances
     balances = wrapper.balances()
     # calculate balanced portfolio
-    purchases, new_balances = calculator.balance(positions, balances, comp, price_getter(wrapper))
+    new_positions, new_balances = calculator.balance(positions, balances, comp, price_getter(wrapper))
+    # store calculations in db
+    portfoliodb.save(account_id, new_balances, new_positions)
     # generate tables
     tablegenerator = TableGenerator()
-    p_table = tablegenerator.transactions_table(purchases)
+    p_table = tablegenerator.transactions_table(new_positions)
     b_table = tablegenerator.balances_table(new_balances)
 
     # email tables
