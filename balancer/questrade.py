@@ -8,43 +8,34 @@ class Client:
         self.account_id = account_id
 
     def __login(self, refresh_token):
-        config = self.get(self.LOGIN_URL + refresh_token, headers={})
-        self.api_server = config["api_server"]
-        self.authorization = config['token_type'] + ' ' + config['access_token']
+        response = requests.get(self.LOGIN_URL + refresh_token)
+        response.raise_for_status()
+        config = response.json()
+        self.api_server = config["api_server"] + 'v1/'
+        self.header = { "authorization":
+                f"{config['token_type']} {config['access_token']}" }
         return config
 
     def get_accounts(self):
-        url = "{s.api_server}v1/accounts".format(s=self)
-        return self.get(url)
+        return self.get("accounts")
 
     def get_balances(self):
-        url = "{s.api_server}v1/accounts/{s.account_id}/balances".format(s=self)
-        return self.get(url)
+        return self.get(f"accounts/{self.account_id}/balances")
 
     def get_positions(self):
-        url = "{s.api_server}v1/accounts/{s.account_id}/positions".format(s=self)
-        return self.get(url)
+        return self.get(f"accounts/{self.account_id}/positions")
 
     def get_symbol(self, symbol):
-        url = "{s.api_server}v1/symbols".format(s=self)
-        return self.get(url, params={'names': symbol})
+        return self.get("symbols", params={'names': symbol})
 
     def get_quote(self, symbol_id):
-        url = "{s.api_server}v1/markets/quotes/{symbol_id}".format(s=self, symbol_id=symbol_id)
-        return self.get(url)
+        return self.get(f"markets/quotes/{symbol_id}")
 
-    def get(self, url, headers=None, params=None):
-        return self.get_raw(url, headers, params).json()
+    def get(self, path, params=None):
+        return self.get_raw(path, params).json()
 
-    def get_raw(self, url, headers=None, params=None):
-        if headers is None:
-            headers = { "authorization": self.authorization }
-        response = requests.get(url, headers=headers, params=params)
+    def get_raw(self, path, params=None):
+        response = requests.get(self.api_server + path,
+                                headers=self.header, params=params)
         response.raise_for_status()
         return response
-
-    def __post_request_headers(self):
-        return {
-            "authorization": self.authorization,
-            "Content-Type": "application/json"
-        }
