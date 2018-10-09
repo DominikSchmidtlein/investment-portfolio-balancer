@@ -1,0 +1,227 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Root stack for the Amplify AWS CloudFormation provider",
+	"Parameters": {
+		"DeploymentBucketName": {
+			"Description": "Name of the common deployment bucket provided by the parent stack",
+			"Type": "String",
+			"Default": "DeploymentBucket"
+		},
+		"AuthRoleName": {
+			"Type": "String",
+			"Default": "AuthRoleName"
+		},
+		"UnauthRoleName": {
+			"Type": "String",
+			"Default": "UnauthRoleName"
+		}
+	},
+	"Resources": {
+		"DeploymentBucket": {
+			"Type": "AWS::S3::Bucket",
+			"DeletionPolicy": "Retain",
+			"Properties": {
+				"BucketName": {
+					"Ref": "DeploymentBucketName"
+				}
+			}
+		},
+		"AuthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "AuthRoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Allow",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity",
+							"Condition": {
+								"ForAnyValue:StringLike": {
+									"cognito-identity.amazonaws.com:amr": "authenticated"
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"UnauthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "UnauthRoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Allow",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity",
+							"Condition": {
+								"ForAnyValue:StringLike": {
+									"cognito-identity.amazonaws.com:amr": "unauthenticated"
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"hostingS3AndCloudFront": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/hosting/template.json",
+				"Parameters": {}
+			}
+		},
+		"authcognito699b8b8b": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/auth/cognito699b8b8b-cloudformation-template.yml",
+				"Parameters": {
+					"identityPoolName": "rebalancerapp_identitypool_f233393b",
+					"allowUnauthenticatedIdentities": true,
+					"thirdPartyAuth": false,
+					"lambdaLogPolicy": "rebalancerapp_lambda_log_policy",
+					"openIdLambdaRoleName": "rebalancerapp_openid_lambda_role",
+					"openIdRolePolicy": "rebalancerapp_openid_pass_role_policy",
+					"openIdLambdaIAMPolicy": "rebalancerapp_openid_lambda_iam_policy",
+					"openIdLogPolicy": "rebalancerapp_openid_lambda_log_policy",
+					"authSelections": "identityPoolOnly",
+					"resourceName": "cognito699b8b8b",
+					"unAuthRoleName": "rebalancerapp-20181001213442-unauthRole",
+					"authRoleName": "rebalancerapp-20181001213442-authRole",
+					"unAuthRoleArn": "arn:aws:iam::733912424038:role/rebalancerapp-20181001213442-unauthRole",
+					"authRoleArn": "arn:aws:iam::733912424038:role/rebalancerapp-20181001213442-authRole"
+				}
+			}
+		},
+		"analyticsrebalancerapp": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/analytics/pinpoint-cloudformation-template.json",
+				"Parameters": {
+					"appName": "rebalancerapp",
+					"roleName": "pinpointLambdaRole8bc5a8d9",
+					"cloudWatchPolicyName": "cloudWatchPolicy8bc5a8d9",
+					"pinpointPolicyName": "pinpointPolicy8bc5a8d9",
+					"authPolicyName": "pinpoint_amplify_8bc5a8d9",
+					"unauthPolicyName": "pinpoint_amplify_8bc5a8d9",
+					"authRoleName": "rebalancerapp-20181001213442-authRole",
+					"unauthRoleName": "rebalancerapp-20181001213442-unauthRole",
+					"IAMPrefix": "733912424038"
+				}
+			}
+		},
+		"functionrebalancerappd93c3e89": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/function/rebalancerappd93c3e89-cloudformation-template.json",
+				"Parameters": {}
+			}
+		},
+		"apirebalancerapi": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/api/rebalancerapi-cloudformation-template.json",
+				"Parameters": {
+					"functionrebalancerappd93c3e89Name": {
+						"Fn::GetAtt": [
+							"functionrebalancerappd93c3e89",
+							"Outputs.Name"
+						]
+					},
+					"functionrebalancerappd93c3e89Arn": {
+						"Fn::GetAtt": [
+							"functionrebalancerappd93c3e89",
+							"Outputs.Arn"
+						]
+					}
+				}
+			}
+		}
+	},
+	"Outputs": {
+		"Region": {
+			"Description": "CloudFormation provider root stack Region",
+			"Value": {
+				"Ref": "AWS::Region"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-Region"
+				}
+			}
+		},
+		"StackName": {
+			"Description": "CloudFormation provider root stack ID",
+			"Value": {
+				"Ref": "AWS::StackName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackName"
+				}
+			}
+		},
+		"StackId": {
+			"Description": "CloudFormation provider root stack name",
+			"Value": {
+				"Ref": "AWS::StackId"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackId"
+				}
+			}
+		},
+		"DeploymentBucketName": {
+			"Description": "CloudFormation provider root stack deployment bucket name",
+			"Value": {
+				"Ref": "DeploymentBucketName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-DeploymentBucketName"
+				}
+			}
+		},
+		"AuthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"AuthRole",
+					"Arn"
+				]
+			}
+		},
+		"UnauthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"UnauthRole",
+					"Arn"
+				]
+			}
+		},
+		"AuthRoleName": {
+			"Value": {
+				"Ref": "AuthRole"
+			}
+		},
+		"UnauthRoleName": {
+			"Value": {
+				"Ref": "UnauthRole"
+			}
+		}
+	}
+}

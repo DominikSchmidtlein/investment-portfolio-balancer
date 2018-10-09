@@ -1,0 +1,11 @@
+{
+    "appName": "rebalancerapp",
+    "roleName": "pinpointLambdaRole8bc5a8d9",
+    "cloudWatchPolicyName": "cloudWatchPolicy8bc5a8d9",
+    "pinpointPolicyName": "pinpointPolicy8bc5a8d9",
+    "authPolicyName": "pinpoint_amplify_8bc5a8d9",
+    "unauthPolicyName": "pinpoint_amplify_8bc5a8d9",
+    "authRoleName": "rebalancerapp-20181001213442-authRole",
+    "unauthRoleName": "rebalancerapp-20181001213442-unauthRole",
+    "IAMPrefix": "733912424038"
+}

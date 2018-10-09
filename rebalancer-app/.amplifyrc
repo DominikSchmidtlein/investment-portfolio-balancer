@@ -1,0 +1,14 @@
+{
+    "providers": {
+        "awscloudformation": {
+            "AuthRoleName": "rebalancerapp-20181001213442-authRole",
+            "UnauthRoleArn": "arn:aws:iam::733912424038:role/rebalancerapp-20181001213442-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::733912424038:role/rebalancerapp-20181001213442-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "rebalancerapp-20181001213442-deployment",
+            "UnauthRoleName": "rebalancerapp-20181001213442-unauthRole",
+            "StackName": "rebalancerapp-20181001213442",
+            "StackId": "arn:aws:cloudformation:us-east-2:733912424038:stack/rebalancerapp-20181001213442/561adfd0-c5e3-11e8-a246-0a888d4075c6"
+        }
+    }
+}

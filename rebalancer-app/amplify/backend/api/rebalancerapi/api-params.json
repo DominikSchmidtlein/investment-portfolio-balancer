@@ -1,0 +1,35 @@
+{
+    "paths": [
+        {
+            "name": "/portfolios",
+            "lambdaFunction": "rebalancerappd93c3e89",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "rebalancerapi",
+    "apiName": "rebalancerappdcca65fa",
+    "functionArns": [
+        {
+            "lambdaFunction": "rebalancerappd93c3e89"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "rebalancerapp-20181001213442-authRole",
+        "unAuthRoleName": "rebalancerapp-20181001213442-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "rebalancerappd93c3e89",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ],
+    "uuid": "21b1907a"
+}

@@ -1,0 +1,113 @@
+{
+    "providers": {
+        "awscloudformation": {
+            "AuthRoleName": "rebalancerapp-20181001213442-authRole",
+            "UnauthRoleArn": "arn:aws:iam::733912424038:role/rebalancerapp-20181001213442-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::733912424038:role/rebalancerapp-20181001213442-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "rebalancerapp-20181001213442-deployment",
+            "UnauthRoleName": "rebalancerapp-20181001213442-unauthRole",
+            "StackName": "rebalancerapp-20181001213442",
+            "StackId": "arn:aws:cloudformation:us-east-2:733912424038:stack/rebalancerapp-20181001213442/561adfd0-c5e3-11e8-a246-0a888d4075c6"
+        }
+    },
+    "hosting": {
+        "S3AndCloudFront": {
+            "service": "S3AndCloudFront",
+            "providerPlugin": "awscloudformation",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/hosting/template.json",
+                "logicalId": "hostingS3AndCloudFront"
+            },
+            "lastPushTimeStamp": "2018-10-04T01:46:00.020Z",
+            "output": {
+                "S3BucketSecureURL": "https://rebalancerapp-20181001213852--hostingbucket.s3.amazonaws.com",
+                "WebsiteURL": "http://rebalancerapp-20181001213852--hostingbucket.s3-website.us-east-2.amazonaws.com",
+                "Region": "us-east-2",
+                "HostingBucketName": "rebalancerapp-20181001213852--hostingbucket"
+            },
+            "lastPushDirHash": "mFDEAAJYhY/dRDAvjkkbZvwNJB4="
+        }
+    },
+    "auth": {
+        "cognito699b8b8b": {
+            "service": "Cognito",
+            "providerPlugin": "awscloudformation",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/auth/cognito699b8b8b-cloudformation-template.yml",
+                "logicalId": "authcognito699b8b8b"
+            },
+            "lastPushTimeStamp": "2018-10-04T01:46:00.022Z",
+            "output": {
+                "IdentityPoolId": "us-east-2:d795bbda-99d5-4985-a01c-4e6220c9acb4",
+                "IdentityPoolName": "rebalancerapp_identitypool_f233393b"
+            },
+            "lastPushDirHash": "9vCOkuqt7pzQGJfQAEac0p/xct0="
+        }
+    },
+    "analytics": {
+        "rebalancerapp": {
+            "service": "Pinpoint",
+            "providerPlugin": "awscloudformation",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/analytics/pinpoint-cloudformation-template.json",
+                "logicalId": "analyticsrebalancerapp"
+            },
+            "lastPushTimeStamp": "2018-10-04T01:46:00.022Z",
+            "output": {
+                "appName": "rebalancerapp",
+                "Region": "us-east-1",
+                "Id": "d784c2f459fd44899532a65256004c9f"
+            },
+            "lastPushDirHash": "uQHo1NMuEw1U+iXd+o59BKSly8I="
+        }
+    },
+    "function": {
+        "rebalancerappd93c3e89": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "dependsOn": [],
+            "lastBuildTimeStamp": "2018-10-04T01:40:54.069Z",
+            "lastPackageTimeStamp": "2018-10-04T01:40:58.540Z",
+            "distZipFilename": "rebalancerappd93c3e89-1538617254-latest-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/function/rebalancerappd93c3e89-cloudformation-template.json",
+                "logicalId": "functionrebalancerappd93c3e89"
+            },
+            "lastPushTimeStamp": "2018-10-04T01:46:00.023Z",
+            "output": {
+                "Region": "us-east-2",
+                "Arn": "arn:aws:lambda:us-east-2:733912424038:function:rebalancerappd93c3e89",
+                "Name": "rebalancerappd93c3e89"
+            },
+            "lastPushDirHash": "zBkM299ZXWl9a5KZ/LNMPFBsuB4="
+        }
+    },
+    "api": {
+        "rebalancerapi": {
+            "service": "API Gateway",
+            "providerPlugin": "awscloudformation",
+            "dependsOn": [
+                {
+                    "category": "function",
+                    "resourceName": "rebalancerappd93c3e89",
+                    "attributes": [
+                        "Name",
+                        "Arn"
+                    ]
+                }
+            ],
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/rebalancerapp-20181001213442-deployment/amplify-cfn-templates/api/rebalancerapi-cloudformation-template.json",
+                "logicalId": "apirebalancerapi"
+            },
+            "lastPushTimeStamp": "2018-10-04T01:46:00.023Z",
+            "output": {
+                "ApiName": "rebalancerapi",
+                "RootUrl": "https://i063evdjb3.execute-api.us-east-2.amazonaws.com/Prod"
+            },
+            "lastPushDirHash": "U5fw9IpsjwO3ZXl+f33ItEi3DWc="
+        }
+    }
+}
